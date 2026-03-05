@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BMI Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <header>
+      <div class="header_in">
+        <div class="logo">BMI<strong>Calculator</strong></div>
+        <!-- unit toggle button -->
+        <button class="unitToggleBtn" id="unitToggle">
+          <span id="unitLabel">cm / kg</span>
+          <span class="ts"><span class="tk"></span></span>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="">
+        <form id="bmiForm" novalidate>
+          <div class="inputCont">
+            <label for="nameInput">Your Name</label>
+            <input
+              type="text"
+              id="nameInput"
+              placeholder="Enter your name"
+              autocomplete="off"
+            />
+            <span class="error" id="nameErr"></span>
+          </div>
+
+          <div class="inputsRow">
+            <div class="inputCont">
+              <label for="heightInput"
+                >Height <span id="heightUnit" class="uh">(cm)</span></label
+              >
+              <input
+                type="number"
+                id="heightInput"
+                placeholder="Height"
+                min="0"
+                step="0.1"
+              />
+              <span class="error" id="heightErr"></span>
+            </div>
+            <div class="inputCont">
+              <label for="weightInput"
+                >Weight <span id="weightUnit" class="uh">(kg)</span></label
+              >
+              <input
+                type="number"
+                id="weightInput"
+                placeholder="Weight"
+                min="0"
+                step="0.1"
+              />
+              <span class="error" id="weightErr"></span>
+            </div>
+          </div>
+
+          <div class="btnRow">
+            <button type="submit" class="calculateBmiBtn">BMI</button>
+            <button type="button" class="resetInputsBtn" id="resetBtn">
+              Clear
+            </button>
+          </div>
+        </form>
+
+        <!-- results -->
+        <div class="resultCard" id="resultCard">
+          <div class="resultHead">
+            <div>
+              <div class="resultName" id="resultName"></div>
+              <div class="resultUnits" id="resultUnits"></div>
+            </div>
+            <div class="resultBadge" id="resultBadge"></div>
+          </div>
+          <div class="bmiDisplay">
+            <span class="bmiValueLabel">BMI</span>
+            <span class="bmiValue" id="bmiValue"></span>
+          </div>
+          <div class="bmiWrapper">
+            <div class="bmiBar">
+              <div class="barPart underW"></div>
+              <div class="barPart normalW"></div>
+              <div class="barPart overW"></div>
+              <div class="barPart obese"></div>
+              <div class="marker" id="bmiMarker"></div>
+            </div>
+            <div class="bmiLabels">
+              <span>Under<br />weight</span>
+              <span>Normal</span>
+              <span>Over<br />weight</span>
+              <span>Obese</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- history -->
+      <section class="history">
+        <div class="historyHead">
+          <h2>History</h2>
+          <button class="historyClearBtn" id="clearHistory">Clear All</button>
+        </div>
+        <div class="historyList" id="historyList">
+          <div class="historyEmp" id="historyEmpty">
+            <p>No records yet</p>
+            <span>Your BMI history will show here</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="index.js"></script>
+  </body>
+</html>

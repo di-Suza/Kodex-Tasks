@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blinkit — Product Panel</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-left">
+        <div class="nav-logo">
+          <span class="logo-icon">⚡</span>
+          <span class="logo-text">blinkit</span>
+          <span class="logo-badge">Seller Panel</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <span class="nav-stat" id="totalCount">0 Products</span>
+        <div class="nav-avatar">SP</div>
+      </div>
+    </nav>
+
+    <div class="layout">
+      <!-- LEFT: ADD PRODUCT FORM -->
+      <aside class="form-panel">
+        <div class="panel-header">
+          <h2>Add Product</h2>
+          <p>Fill in the details to list a new product</p>
+        </div>
+
+        <form id="productForm">
+          <div class="form-group">
+            <label>Product Name <span class="req">*</span></label>
+            <input
+              type="text"
+              id="name"
+              placeholder="e.g. Amul Butter 500g"
+              required
+            />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (₹) <span class="req">*</span></label>
+              <input
+                type="number"
+                id="price"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>MRP (₹)</label>
+              <input
+                type="number"
+                id="mrp"
+                placeholder="0.00"
+                min="0"
+                step="0.01"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Category <span class="req">*</span></label>
+            <div class="select-wrap">
+              <select id="category" required>
+                <option value="" disabled selected>Select a category</option>
+                <option value="Fruits & Vegetables">
+                  🥦 Fruits & Vegetables
+                </option>
+                <option value="Dairy & Breakfast">🥛 Dairy & Breakfast</option>
+                <option value="Snacks & Beverages">
+                  🍿 Snacks & Beverages
+                </option>
+                <option value="Bakery & Biscuits">🍞 Bakery & Biscuits</option>
+                <option value="Instant & Frozen">🍜 Instant & Frozen</option>
+                <option value="Personal Care">🧴 Personal Care</option>
+                <option value="Household Supplies">
+                  🧹 Household Supplies
+                </option>
+                <option value="Baby Care">👶 Baby Care</option>
+                <option value="Pet Supplies">🐾 Pet Supplies</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Weight / Volume</label>
+              <input type="text" id="weight" placeholder="e.g. 500g, 1L" />
+            </div>
+            <div class="form-group">
+              <label>Stock Qty <span class="req">*</span></label>
+              <input
+                type="number"
+                id="stock"
+                placeholder="0"
+                min="0"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Brand</label>
+            <input type="text" id="brand" placeholder="e.g. Amul, Nestlé" />
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              id="description"
+              rows="3"
+              placeholder="Short product description..."
+            ></textarea>
+          </div>
+
+          <div class="form-group toggle-group">
+            <label>In Stock</label>
+            <label class="toggle">
+              <input type="checkbox" id="inStock" checked />
+              <span class="toggle-track"
+                ><span class="toggle-thumb"></span
+              ></span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn-add">
+            <span>+ Add Product</span>
+          </button>
+        </form>
+      </aside>
+
+      <!-- RIGHT: PRODUCT LIST -->
+      <main class="products-panel">
+        <div class="products-header">
+          <div>
+            <h2>Product Listings</h2>
+            <p id="listingCount">No products added yet</p>
+          </div>
+          <div class="filter-row">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="🔍  Search products..."
+              class="search-input"
+            />
+            <select id="filterCategory" class="filter-select">
+              <option value="">All Categories</option>
+              <option value="Fruits & Vegetables">Fruits & Vegetables</option>
+              <option value="Dairy & Breakfast">Dairy & Breakfast</option>
+              <option value="Snacks & Beverages">Snacks & Beverages</option>
+              <option value="Bakery & Biscuits">Bakery & Biscuits</option>
+              <option value="Instant & Frozen">Instant & Frozen</option>
+              <option value="Personal Care">Personal Care</option>
+              <option value="Household Supplies">Household Supplies</option>
+              <option value="Baby Care">Baby Care</option>
+              <option value="Pet Supplies">Pet Supplies</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="productGrid" class="product-grid">
+          <!-- Cards rendered by JS -->
+          <div class="empty-state" id="emptyState">
+            <div class="empty-icon">📦</div>
+            <p>No products yet.</p>
+            <span>Add your first product from the form.</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- EDIT MODAL -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3>Edit Product</h3>
+          <button class="modal-close" id="modalClose">✕</button>
+        </div>
+        <form id="editForm">
+          <input type="hidden" id="editId" />
+
+          <div class="form-group">
+            <label>Product Name</label>
+            <input type="text" id="editName" required />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Price (₹)</label>
+              <input type="number" id="editPrice" step="0.01" required />
+            </div>
+            <div class="form-group">
+              <label>MRP (₹)</label>
+              <input type="number" id="editMrp" step="0.01" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Category</label>
+            <div class="select-wrap">
+              <select id="editCategory" required>
+                <option value="Fruits & Vegetables">
+                  🥦 Fruits & Vegetables
+                </option>
+                <option value="Dairy & Breakfast">🥛 Dairy & Breakfast</option>
+                <option value="Snacks & Beverages">
+                  🍿 Snacks & Beverages
+                </option>
+                <option value="Bakery & Biscuits">🍞 Bakery & Biscuits</option>
+                <option value="Instant & Frozen">🍜 Instant & Frozen</option>
+                <option value="Personal Care">🧴 Personal Care</option>
+                <option value="Household Supplies">
+                  🧹 Household Supplies
+                </option>
+                <option value="Baby Care">👶 Baby Care</option>
+                <option value="Pet Supplies">🐾 Pet Supplies</option>
+              </select>
+              <span class="select-arrow">▾</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Weight / Volume</label>
+              <input type="text" id="editWeight" />
+            </div>
+            <div class="form-group">
+              <label>Stock Qty</label>
+              <input type="number" id="editStock" min="0" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Brand</label>
+            <input type="text" id="editBrand" />
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <textarea id="editDescription" rows="3"></textarea>
+          </div>
+
+          <div class="form-group toggle-group">
+            <label>In Stock</label>
+            <label class="toggle">
+              <input type="checkbox" id="editInStock" />
+              <span class="toggle-track"
+                ><span class="toggle-thumb"></span
+              ></span>
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" id="cancelEdit">
+              Cancel
+            </button>
+            <button type="submit" class="btn-save">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script src="index.js"></script>
+  </body>
+</html>

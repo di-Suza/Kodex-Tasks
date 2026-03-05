@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DOM Task 1 — querySelectorAll + childNodes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<header>
+  <h1>DOM <span>Explorer</span></h1>
+  <p>querySelectorAll + childNodes in action</p>
+</header>
+
+<div class="controls">
+  <button class="btn" id="btnHighlight">Highlight All Titles</button>
+  <button class="btn" id="btnTags">Flash All Tags</button>
+  <button class="btn" id="btnReset">Reset All</button>
+  <button class="btn" id="btnCount">Count Child Nodes</button>
+</div>
+
+<div class="node-count" id="nodeInfo">Click "Count Child Nodes" to inspect the DOM 👇</div>
+
+<div class="grid" id="cardGrid">
+
+  <div class="card" data-topic="arrays">
+    <span class="card-icon">📦</span>
+    <div class="card-title">Arrays</div>
+    <span class="card-tag">JS Basics</span>
+    <p class="card-desc">Store multiple values in a single variable. Use map, filter, reduce to transform data.</p>
+    <div class="card-footer">topic: arrays</div>
+  </div>
+
+  <div class="card" data-topic="events">
+    <span class="card-icon">⚡</span>
+    <div class="card-title">Events</div>
+    <span class="card-tag">DOM</span>
+    <p class="card-desc">Listen to user actions like click, hover, keypress. addEventListener is your best friend.</p>
+    <div class="card-footer">topic: events</div>
+  </div>
+
+  <div class="card" data-topic="fetch">
+    <span class="card-icon">🌐</span>
+    <div class="card-title">Fetch API</div>
+    <span class="card-tag">Async</span>
+    <p class="card-desc">Make HTTP requests without page reload. Returns a Promise — chain with .then() or use async/await.</p>
+    <div class="card-footer">topic: fetch</div>
+  </div>
+
+  <div class="card" data-topic="closures">
+    <span class="card-icon">🔒</span>
+    <div class="card-title">Closures</div>
+    <span class="card-tag">Advanced</span>
+    <p class="card-desc">A function that remembers variables from its outer scope even after that scope has finished.</p>
+    <div class="card-footer">topic: closures</div>
+  </div>
+
+  <div class="card" data-topic="dom">
+    <span class="card-icon">🌳</span>
+    <div class="card-title">DOM Tree</div>
+    <span class="card-tag">DOM</span>
+    <p class="card-desc">The browser's object representation of your HTML. Every tag becomes a node you can manipulate.</p>
+    <div class="card-footer">topic: dom</div>
+  </div>
+
+  <div class="card" data-topic="promises">
+    <span class="card-icon">🤝</span>
+    <div class="card-title">Promises</div>
+    <span class="card-tag">Async</span>
+    <p class="card-desc">Handle async operations cleanly. A Promise is either pending, fulfilled, or rejected.</p>
+    <div class="card-footer">topic: promises</div>
+  </div>
+
+</div>
+
+<div class="log" id="logBox">
+  <p>// event log will appear here...</p>
+</div>
+
+<script src="index.js"></script>
+
+</body>
+</html>

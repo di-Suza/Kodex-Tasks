@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>DOM Task 2 — Sticky Navbar with Wheel Event</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index2.css" />
+  </head>
+  <body>
+    <!-- NAVBAR -->
+    <nav id="navbar">
+      <div class="logo">wheel<span>.</span>nav</div>
+      <ul>
+        <li><a href="#home">Home</a></li>
+        <li><a href="#how">How it works</a></li>
+        <li><a href="#code">Code</a></li>
+      </ul>
+      <div class="pill" id="pill">Waiting...</div>
+    </nav>
+
+    <!-- Scroll progress -->
+    <div id="progressBar"></div>
+
+    <!-- Delta live badge -->
+    <div id="deltaBadge">
+      <div class="dir">wheel deltaY</div>
+      <div class="val" id="deltaVal">0</div>
+      <div class="dir" id="deltaDir">—</div>
+    </div>
+
+    <div style="height: 300vh"></div>
+
+    <script src="index2.js"></script>
+  </body>
+</html>

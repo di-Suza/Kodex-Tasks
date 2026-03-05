@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>DOM Task 2 — Sticky Navbar with Wheel Event</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+ <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <div class="logo">wheel<span>.</span>nav</div>
+  <ul>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#code">Code</a></li>
+  </ul>
+  <div class="pill" id="pill">Waiting...</div>
+</nav>
+
+<!-- Scroll progress -->
+<div id="progressBar"></div>
+
+<!-- Delta live badge -->
+<div id="deltaBadge">
+  <div class="dir">wheel deltaY</div>
+  <div class="val" id="deltaVal">0</div>
+  <div class="dir" id="deltaDir">—</div>
+</div>
+
+<!-- ── SECTIONS ── -->
+<section class="hero" id="home">
+  <p class="hero-label">DOM Task 2 — Wheel Event</p>
+  <h1>Scroll<br><span class="accent">down.</span><br>Watch it<br>disappear.</h1>
+  <p>Scroll neeche jao — navbar chala jayega. Upar scroll karo — wapas aa jayega. Simple <code>wheel</code> event + <code>deltaY</code>.</p>
+  <div class="scroll-hint">↓ &nbsp; scroll karo</div>
+</section>
+
+<section class="section" id="how">
+  <p class="section-label">How it works</p>
+  <h2>The Logic</h2>
+
+  <div class="cards-row">
+    <div class="mini-card">
+      <span class="num">01</span>
+      <h3>wheel event</h3>
+      <p>Browser window pe <code>wheel</code> event listen karte hain. Ye tab fire hota hai jab user mouse scroll karta hai.</p>
+    </div>
+    <div class="mini-card">
+      <span class="num">02</span>
+      <h3>deltaY value</h3>
+      <p><code>e.deltaY</code> positive hoti hai jab neeche scroll ho, negative hoti hai jab upar scroll ho.</p>
+    </div>
+    <div class="mini-card">
+      <span class="num">03</span>
+      <h3>translateY trick</h3>
+      <p>Navbar ko <code>translateY(-100%)</code> se hide karte hain. CSS transition se smooth animation milti hai.</p>
+    </div>
+    <div class="mini-card">
+      <span class="num">04</span>
+      <h3>class toggle</h3>
+      <p>Sirf ek class <code>.hidden</code> add/remove karte hain JS se. Baaki sab CSS handle karta hai.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="code">
+  <p class="section-label">The Code</p>
+  <h2>Under the<br>hood</h2>
+
+  <div class="code-box">
+    <span class="cm">// Wheel event listen karo</span><br>
+    <span class="kw">window</span>.<span class="fn">addEventListener</span>(<span class="str">'wheel'</span>, (e) => {<br>
+    &nbsp;&nbsp;<span class="cm">// deltaY > 0 = neeche ja raha → hide</span><br>
+    &nbsp;&nbsp;<span class="kw">if</span> (e.deltaY <span class="kw">></span> <span class="str">0</span>) {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;navbar.<span class="fn">classList</span>.<span class="fn">add</span>(<span class="str">'hidden'</span>);<br>
+    &nbsp;&nbsp;} <span class="kw">else</span> {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;<span class="cm">// deltaY < 0 = upar ja raha → show</span><br>
+    &nbsp;&nbsp;&nbsp;&nbsp;navbar.<span class="fn">classList</span>.<span class="fn">remove</span>(<span class="str">'hidden'</span>);<br>
+    &nbsp;&nbsp;}<br>
+    });
+  </div>
+
+  <div class="cards-row" style="margin-top: 40px;">
+    <div class="mini-card">
+      <span class="num" style="font-size:1rem;">deltaY &gt; 0</span>
+      <h3>Neeche scroll</h3>
+      <p>Navbar hide — <code>.hidden</code> class add → <code>translateY(-100%)</code></p>
+    </div>
+    <div class="mini-card">
+      <span class="num" style="font-size:1rem;">deltaY &lt; 0</span>
+      <h3>Upar scroll</h3>
+      <p>Navbar show — <code>.hidden</code> class remove → <code>translateY(0)</code></p>
+    </div>
+  </div>
+</section>
+
+
+<script src="index.js"></script>
+
+</body>
+</html>
