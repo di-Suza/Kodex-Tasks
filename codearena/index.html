@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <!-- NAME FORM MODAL -->
+    <div class="modal" tabindex="-1" id="name-form">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Enter Your Name</h5>
+          </div>
+
+          <div class="modal-body">
+            <form id="nameForm">
+              <div class="mb-3">
+                <label for="userName" class="form-label">Your Name</label>
+                <input
+                  type="text"
+                  required
+                  class="form-control"
+                  id="userName"
+                  placeholder="Enter your name"
+                />
+              </div>
+
+              <div class="text-end">
+                <button
+                  type="submit"
+                  id="addNameBtn"
+                  form="nameForm"
+                  class="btn btn-primary"
+                >
+                  Add Name
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- NAME FORM MODAL END -->
+    <!-- EDIT USER MODAL -->
+    <div class="modal" tabindex="-1" id="editUserModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Edit Users</h5>
+          </div>
+
+          <div class="modal-body">
+            <ul class="usersList"></ul>
+          </div>
+          <div class="modal-footer flex-end">
+            <button class="btn btn-secondary closeModal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- EDIT USER MODAL END -->
+    <!-- SELECT YOUR NAME CONTAINER-->
+    <section class="container my-4 selectYourName">
+      <div class="row justify-content-center">
+        <div class="col-md-6 col-12">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h5 class="card-title mb-3 text-center">Select Yourself</h5>
+
+              <!-- Select Input -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between">
+                  <label class="form-label">Select User</label>
+                  <!-- Right: Settings Icon -->
+                  <button class="editUsers">
+                    <i class="bi bi-gear"></i>
+                  </button>
+                </div>
+                <select id="userSelect" class="form-select"></select>
+              </div>
+
+              <!-- Add New User Button -->
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <span>Don't see your name?</span>
+                <button class="btn btn-outline-primary btn-sm" id="addNewUser">
+                  Add New User
+                </button>
+              </div>
+
+              <!-- Continue Button -->
+              <button id="continueBtn" class="btn btn-primary w-100" disabled>
+                Continue
+              </button>
+
+              <!-- Leaderboard Btn -->
+              <button id="ShowLeaderBoardBtn" class="btn btn-primary w-100">
+                Show Leaderboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEADERBOARD MODAL -->
+    <div class="modal" tabindex="-1" id="leaderBoardModal">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Leader Board</h5>
+          </div>
+
+          <div class="modal-body">
+            <ul class="list-group mb-2">
+              <li class="list-group-item d-flex fw-bold">
+                <div class="col-6">User Name</div>
+                <div class="col-3 text-center">Solved</div>
+                <div class="col-3 text-center">Points</div>
+              </li>
+            </ul>
+          </div>
+          <div class="modal-footer flex-end">
+            <button class="btn btn-secondary closeModal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- LEADERBOARD MODAL -->
+    <!-- MAIN SECTION -->
+    <div id="problemSelectingSection">
+      <!-- NAVBAR -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
+        <div class="container-fluid">
+          <!-- Left: Select User Again Button -->
+          <button id="selectNameAgainBtn" class="btn btn-outline-primary me-3">
+            <i class="bi bi-box-arrow-left"></i>
+          </button>
+
+          <!-- Center: Current User Name -->
+          <div class="mx-auto text-center flex-grow-1">
+            <span class="navbar-brand mb-0 h5" id="selectedUserName">
+              <!-- JS will insert selected username here -->
+              Current User
+            </span>
+          </div>
+        </div>
+      </nav>
+
+      <!-- NAVBAR -->
+
+      <!-- SELECT PROBLEM DIFFICULTY -->
+      <div class="container my-4" id="problemDifficulty">
+        <h4 class="text-center mb-4">Choose Difficulty</h4>
+
+        <div class="row g-4">
+          <!-- Easy -->
+          <div class="col-12 col-md-4" id="easy">
+            <div
+              class="card text-center shadow-sm difficulty-card"
+              data-difficulty="easy"
+            >
+              <div class="card-body">
+                <h5 class="card-title">Easy</h5>
+                <p class="card-text">
+                  Basic level problems for warm-up and quick practice.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Medium -->
+          <div class="col-12 col-md-4" id="medium">
+            <div
+              class="card text-center shadow-sm difficulty-card"
+              data-difficulty="medium"
+            >
+              <div class="card-body">
+                <h5 class="card-title">Medium</h5>
+                <p class="card-text">
+                  Balanced difficulty to improve problem-solving skills.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hard -->
+          <div class="col-12 col-md-4" id="hard">
+            <div
+              class="card text-center shadow-sm difficulty-card"
+              data-difficulty="hard"
+            >
+              <div class="card-body">
+                <h5 class="card-title">Hard</h5>
+                <p class="card-text">
+                  Challenging problems for advanced preparation.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SELECT PROBLEM DIFFICULTY -->
+    </div>
+
+    <!-- SOLVE PROBLEMS SECTION -->
+    <!-- EASY -->
+    <div class="container my-4" id="problemsSectionEasy">
+      <button class="backToChooseDifficulty btn btn-outline-primary me-3">
+        <i class="bi bi-box-arrow-left"></i>
+      </button>
+      <!-- Header Section -->
+      <div class="text-center mb-3">
+        <!-- User Name -->
+        <h2 class="displayUserName"></h2>
+
+        <!-- Selected Difficulty -->
+        <p class="text-muted fs-5">
+          Difficulty:
+          <span id="displayDifficulty" class="fw-bold">Easy</span>
+        </p>
+      </div>
+
+      <!-- Main Content Box -->
+      <div
+        class="text-center p-4 border rounded shadow-sm mainContentBox"
+        id="mainContentBox"
+      >
+        <!-- You can add anything here -->
+        <button id="startBtn" class="btn btn-primary btn-lg">
+          Click to Start Solving...
+        </button>
+
+        <!-- ----------------------------------------- -->
+        <!-- Accordion -->
+        <div data-level-type="easy" class="accordion" id="accordion-easy"></div>
+
+        <!-- ----------------------------------------- -->
+      </div>
+    </div>
+
+    <!-- MEDIUM -->
+    <div class="container my-4" id="problemsSectionMedium">
+      <button class="backToChooseDifficulty btn btn-outline-primary me-3">
+        <i class="bi bi-box-arrow-left"></i>
+      </button>
+      <!-- Header Section -->
+      <div class="text-center mb-3">
+        <!-- User Name -->
+        <h2 class="displayUserName"></h2>
+
+        <!-- Selected Difficulty -->
+        <p class="text-muted fs-5">
+          Difficulty:
+          <span id="displayDifficulty" class="fw-bold">Medium</span>
+        </p>
+      </div>
+
+      <!-- Main Content Box -->
+      <div
+        class="text-center p-4 border rounded shadow-sm mainContentBox"
+        id="mainContentBox"
+      >
+        <!-- You can add anything here -->
+        <button id="startBtn" class="btn btn-primary btn-lg">
+          Click to Start Solving...
+        </button>
+
+        <!-- ----------------------------------------- -->
+        <!-- Accordion -->
+        <div
+          data-level-type="medium"
+          class="accordion"
+          id="accordion-medium"
+        ></div>
+
+        <!-- ----------------------------------------- -->
+      </div>
+    </div>
+
+    <!-- HARD -->
+    <div class="container my-4" id="problemsSectionHard">
+      <button class="backToChooseDifficulty btn btn-outline-primary me-3">
+        <i class="bi bi-box-arrow-left"></i>
+      </button>
+      <!-- Header Section -->
+      <div class="text-center mb-3">
+        <!-- User Name -->
+        <h2 class="displayUserName"></h2>
+
+        <!-- Selected Difficulty -->
+        <p class="text-muted fs-5">
+          Difficulty:
+          <span id="displayDifficulty" class="fw-bold">Hard</span>
+        </p>
+      </div>
+
+      <!-- Main Content Box -->
+      <div
+        class="text-center p-4 border rounded shadow-sm mainContentBox"
+        id="mainContentBox"
+      >
+        <!-- You can add anything here -->
+        <button id="startBtn" class="btn btn-primary btn-lg">
+          Click to Start Solving...
+        </button>
+
+        <!-- ----------------------------------------- -->
+        <!-- Accordion -->
+        <div data-level-type="hard" class="accordion" id="accordion-hard"></div>
+
+        <!-- ----------------------------------------- -->
+      </div>
+    </div>
+
+    <!-- SOLVE PROBLEMS SECTION -->
+
+    <!-- STATUS MODAL -->
+    <!-- NAME FORM MODAL -->
+    <div class="modal" tabindex="-1" id="problem-status">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Failed</h5>
+          </div>
+
+          <div class="modal-body">
+            <div></div>
+          </div>
+          <div class="modal-footer">
+            <button class="modalCloseBtn btn btn-danger">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- NAME FORM MODAL END -->
+    <!-- STATUS MODAL -->
+    <!-- ---------------------------------------------------------- -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module" src="index.js"></script>
+    <script type="module" src="helper.js"></script>
+  </body>
+</html>
