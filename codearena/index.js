@@ -833,6 +833,12 @@ mainContentBox.forEach((ele) => {
   const levelType = accordion.dataset.levelType;
 
   btnToStart.addEventListener("click", async () => {
+    btnToStart.disabled = true;
+    // just to prevent from double creation
+    setTimeout(() => {
+      btnToStart.disabled = false;
+    }, 2000);
+
     accordion.innerHTML = "";
 
     const problemsData = await getProblemsData(levelType);
