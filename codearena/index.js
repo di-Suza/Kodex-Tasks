@@ -695,7 +695,10 @@ const createAccordionItem = (problem, unlocked) => {
   // accordion open
   collapse.addEventListener("shown.bs.collapse", () => {
     hideBackBtns();
-    if (!isNextProblem()) return;
+    if (!isNextProblem()) {
+      problem.points = originalPoints;
+      return;
+    }
 
     loadFromCurrentlySolving();
     startTimer(timerDiv, problem.userTime);
@@ -708,8 +711,11 @@ const createAccordionItem = (problem, unlocked) => {
   // accordion close
   collapse.addEventListener("hidden.bs.collapse", () => {
     showBackBtns();
-    if (!isNextProblem()) return;
 
+    if (!isNextProblem()) {
+      problem.points = originalPoints;
+      return;
+    }
     loadFromCurrentlySolving();
     problem.userTime = stopTimer();
     selectedUser.currentlySolving[problem.difficulty] = problem;
