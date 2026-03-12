@@ -1,0 +1,13 @@
+.heading {
+  display: flex;
+  justify-content: center;
+  padding: 1.3rem 0;
+}
+
+.productsParentContainer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 30px;
+  margin: 20px 0;
+}
