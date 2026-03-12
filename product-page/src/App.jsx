@@ -1,4 +1,4 @@
-import ProductCard from "./components/ProductCard/ProductCard";
+import ProductCard from "./components/Cards/ProductCard";
 import "./App.css";
 
 function App() {
