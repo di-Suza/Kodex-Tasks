@@ -2,7 +2,7 @@ import "./ProductCard.css";
 
 const ProductCard = ({ product }) => {
   const { image, name, category, price } = product;
-
+  
   return (
     <div className="productCard">
       <img src={image} alt={name} />

@@ -27,6 +27,7 @@ function App() {
       image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
     },
   ];
+  
   return (
     <>
       <div className="heading">
