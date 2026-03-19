@@ -3,8 +3,7 @@ export default function Header({ postCount }) {
     <header className="header">
       <div className="header-inner">
         <div className="header-brand">
-          <span className="brand-dot" />
-          <span className="brand-name">Postboard</span>
+          <span className="brand-name">KindaPost</span>
         </div>
         <span className="post-counter">
           {postCount} {postCount === 1 ? "post" : "posts"}
