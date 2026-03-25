@@ -1,8 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 
-const SessionContext = createContext();
+export const SessionContext = createContext();
 
-export const SessionProvider = ({ children }) => {
+const SessionProvider = ({ children }) => {
   const [sessions, setSessions] = useState(
     JSON.parse(localStorage.getItem("sessions")) || [],
   );
@@ -33,4 +33,4 @@ export const SessionProvider = ({ children }) => {
   );
 };
 
-export default SessionContext;
+export default SessionProvider;

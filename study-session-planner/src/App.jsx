@@ -1,4 +1,4 @@
-import { SessionProvider } from "./context/SessionContext";
+import SessionProvider from "./context/SessionContext";
 import SessionForm from "./components/SessionForm";
 import SessionList from "./components/SessionList";
 
