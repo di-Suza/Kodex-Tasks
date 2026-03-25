@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useSession } from "../hook/useSession";
+import { useSession } from "../hook/Session";
 import SessionCard from "./SessionCard";
 
 const SessionList = () => {

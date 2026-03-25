@@ -1,5 +1,5 @@
 import { useForm } from "react-hook-form";
-import { useSession } from "../hook/useSession";
+import { useSession } from "../hook/Session";
 
 const SessionForm = () => {
   const { addSession } = useSession();
