@@ -7,10 +7,9 @@ A lightweight React app to plan and track your study sessions.
 - Add study sessions with topic, subject, duration, priority, and date
 - View all sessions in a clean card layout
 - Mark sessions as completed
-- Filter sessions by subject
 - Delete sessions
 - Total study duration shown automatically
-- Priority color coding — High (red), Medium (orange), Low (green)
+- Priority color coding: High (red), Medium (orange), Low (green)
 
 ## Tech Used
 
