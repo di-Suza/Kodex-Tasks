@@ -26,71 +26,79 @@ const HabitList = () => {
         )
       : "None";
 
-  if (habits.length === 0) {
-    return null;
-  }
-
   const visibleHabits = showAll ? habits : habits.slice(0, 3);
 
   return (
     <>
       <div className="max-w-md mx-auto mt-6 px-4 pb-20 ">
-        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-4 w-full">
-          {/* Top */}
-          <div className="flex items-start justify-between mb-1">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 tracking-widest mb-1">
-                DAILY PROGRESS
-              </p>
-              <h2 className="text-xl font-bold text-gray-900">
-                {habits.length !== completedToday
-                  ? `Keep going!`
-                  : `All caught up!!`}
-              </h2>
-            </div>
-            <p className="text-sm text-gray-400 font-medium mt-1">
-              {completedToday} / {habits.length}
+        {habits.length === 0 ? (
+          <div className="w-full bg-gray-50 border border-gray-200 rounded-xl py-10 text-center">
+            <p className="text-sm font-semibold text-gray-500">No habits yet</p>
+            <p className="text-xs text-gray-400 mt-1">
+              Start your journey by adding a new habit above.
             </p>
           </div>
+        ) : (
+          <>
+            <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm mb-4 w-full">
+              {/* Top */}
+              <div className="flex items-start justify-between mb-1">
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 tracking-widest mb-1">
+                    DAILY PROGRESS
+                  </p>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {habits.length !== completedToday
+                      ? `Keep going!`
+                      : `All caught up!!`}
+                  </h2>
+                </div>
+                <p className="text-sm text-gray-400 font-medium mt-1">
+                  {completedToday} / {habits.length}
+                </p>
+              </div>
 
-          {/* Progress bar */}
-          <div className="w-full bg-gray-100 rounded-full h-1.5 my-4">
-            <div
-              className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500"
-              style={{ width: `${progressPercent || 0}%` }}
-            />
-          </div>
+              {/* Progress bar */}
+              <div className="w-full bg-gray-100 rounded-full h-1.5 my-4">
+                <div
+                  className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent || 0}%` }}
+                />
+              </div>
 
-          {/* Bottom row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-0.5">
-                FOCUS
-              </p>
-              <p className="text-sm font-semibold text-gray-700">
-                {mainFocus || "Focus"}
-              </p>
+              {/* Bottom row */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-0.5">
+                    FOCUS
+                  </p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {mainFocus || "Focus"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-0.5">
+                    PRIORITY
+                  </p>
+                  <p className="text-sm font-semibold text-gray-700">
+                    {habits.filter((h) => h.priority === "High").length} High
+                    Tasks
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400 tracking-widest mb-0.5">
-                PRIORITY
-              </p>
-              <p className="text-sm font-semibold text-gray-700">
-                {habits.filter((h) => h.priority === "High").length} High Tasks
-              </p>
+            <div className="flex items-center justify-between mt-6 my-3">
+              <h3 className="text-xs font-bold uppercase text-slate-500">
+                Your Routine
+              </h3>
             </div>
-          </div>
-        </div>
-        <div class="flex items-center justify-between mt-6 my-3">
-          <h3 class="text-xs font-bold uppercase text-slate-500">
-            Your Routine
-          </h3>
-        </div>
-        <div className="space-y-3">
-          {visibleHabits.map((habit) => (
-            <HabitItem key={habit.id} habit={habit} />
-          ))}
-        </div>
+            <div className="space-y-3">
+              {visibleHabits.map((habit) => (
+                <HabitItem key={habit.id} habit={habit} />
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </>
   );
