@@ -134,21 +134,21 @@ const Products = () => {
               sortBy !== "Featured") && (
               <button
                 onClick={clearFilters}
-                className="flex items-center justify-start py- gap-2 px-6 bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl hover:bg-red-400/10 hover:text-red-400 transition group"
+                className="flex items-center cursor-pointer justify-start py- gap-2 px-6 bg-red-500/10 text-red-400 border border-red-500/20 rounded-2xl hover:bg-red-400/10 hover:text-red-400 transition group"
               >
                 <X size={18} />
                 <span className="font-bold">Clear</span>
               </button>
             )}
           </div>
-          {(category !== "All Categories" || sortBy !== "Featured" || search) && (
-            <div className="border-b border-b-white my-3 "></div>
-          )}
+          {(category !== "All Categories" ||
+            sortBy !== "Featured" ||
+            search) && <div className="border-b border-b-white my-3 "></div>}
           <div className="flex gap-2 py-1">
             {/* Active Filter Tags */}
             {category !== "All Categories" && (
               <div className="flex gap-2">
-                <span className="bg-[#d4ff00]/10 text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                <span className="bg-[#d4ff00]/10  cursor-pointer  text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
                   {category}{" "}
                   <X
                     size={14}
@@ -160,7 +160,7 @@ const Products = () => {
             )}
             {sortBy !== "Featured" && (
               <div className="flex gap-2">
-                <span className="bg-[#d4ff00]/10 text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                <span className="bg-[#d4ff00]/10  cursor-pointer  text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
                   {sortBy}{" "}
                   <X
                     size={14}
@@ -172,7 +172,7 @@ const Products = () => {
             )}
             {search !== "" && (
               <div className="flex gap-2">
-                <span className="bg-[#d4ff00]/10 text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
+                <span className="bg-[#d4ff00]/10  cursor-pointer  text-[#d4ff00] border border-[#d4ff00]/20 px-4 py-0.5 rounded-xl text-sm font-bold flex items-center gap-2">
                   {search}{" "}
                   <X
                     size={14}
