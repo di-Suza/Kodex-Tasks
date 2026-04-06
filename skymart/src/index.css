@@ -1,0 +1,12 @@
+@import "tailwindcss";
+@font-face {
+  font-family: 'MyCustomFont'; /* Jo naam tum dena chaho */
+  src: url('./assets/fonts/second.woff2') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+:root{
+    font-family: "MyCustomFont";
+    letter-spacing: 0.02em;
+    background: #111;
+}
