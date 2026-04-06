@@ -195,15 +195,49 @@ const Products = () => {
         {/* Empty State */}
         {filteredProducts.length === 0 && (
           <div className="text-center py-20 bg-[#0f0f0f] border border-gray-800 rounded-[3rem]">
-            <p className="text-gray-500 text-xl">
-              Bhai, is criteria mein koi product nahi mila!
-            </p>
-            <button
-              onClick={clearFilters}
-              className="mt-4 text-[#d4ff00] underline"
-            >
-              Reset filters
-            </button>
+            <div class="text-center">
+              <div class="mb-6 flex justify-center">
+                <div class="relative h-20 w-20">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    class="h-full w-full text-zinc-600"
+                  >
+                    <path d="M21 8L12 3L3 8V16L12 21L21 16V8Z" />
+                    <path d="M3 8L12 13L21 8" />
+                    <path d="M12 13V21" />
+                  </svg>
+                  <div class="absolute -bottom-1 -right-1 rounded-full bg-[#0a0a0a] p-1">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      class="h-6 w-6 text-zinc-400"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <h1 class="mb-2 text-2xl font-semibold tracking-tight text-zinc-200">
+                No products found
+              </h1>
+              <p class="mb-8 text-zinc-500">
+                No results for "<span class="italic">{search}</span>"
+              </p>
+
+              <button
+                onClick={() => clearFilters()}
+                class="cursor-pointer rounded-2xl border border-zinc-700 bg-transparent px-8 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800 active:scale-95"
+              >
+                Clear Filters
+              </button>
+            </div>
           </div>
         )}
       </div>
