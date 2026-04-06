@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router";
+
 const TeamSection = () => {
+  const navigate = useNavigate();
   const values = [
     {
       title: "Trust",
@@ -94,7 +97,10 @@ const TeamSection = () => {
           <p className="text-gray-500">
             Explore thousands of products at unbeatable prices.
           </p>
-          <button className="bg-[#d4ff00] text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition">
+          <button
+            onClick={() => navigate("/products")}
+            className="bg-[#d4ff00] text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition"
+          >
             Browse Products <span>→</span>
           </button>
         </div>
