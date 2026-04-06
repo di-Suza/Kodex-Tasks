@@ -99,7 +99,7 @@ const TeamSection = () => {
           </p>
           <button
             onClick={() => navigate("/products")}
-            className="bg-[#d4ff00] text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition"
+            className="bg-[#d4ff00] cursor-pointer text-black px-8 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition"
           >
             Browse Products <span>→</span>
           </button>
