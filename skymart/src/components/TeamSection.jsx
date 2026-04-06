@@ -53,7 +53,7 @@ const TeamSection = () => {
   ];
 
   return (
-    <div className="bg-black text-white py-16 px-4">
+    <div className="bg-[#0d0d0d]  text-white py-16 px-4">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-center text-2xl font-bold mb-10">
           What We Stand For
@@ -92,7 +92,7 @@ const TeamSection = () => {
         </div>
 
         {/* CTA Box */}
-        <div className="border border-gray-900 rounded-[2rem] p-12 bg-[#050505] text-center flex flex-col items-center gap-6">
+        <div className="border border-[#d4ff00]/20 rounded-[2rem] p-12 bg-[#0d0d0d]  text-center flex flex-col items-center gap-6">
           <h2 className="text-3xl font-bold">Ready to shop?</h2>
           <p className="text-gray-500">
             Explore thousands of products at unbeatable prices.

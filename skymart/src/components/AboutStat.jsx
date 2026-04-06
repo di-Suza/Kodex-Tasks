@@ -41,7 +41,7 @@ const AboutSection = () => {
   ];
 
   return (
-    <div className="bg-black text-white  px-4">
+    <div className="bg-[#0d0d0d]  text-white  px-4">
       <div className="max-w-6xl mx-auto">
         {/* Logo and Heading */}
         <div className="flex flex-col items-center mb-16">
