@@ -11,7 +11,6 @@ import About from "../pages/About/About";
 import ProductDetail from "../pages/ProductDetail/ProductDetail";
 import { getProductsData } from "../service/getProducts";
 import Loading from "../components/Loading";
-import { useLoaderData } from "react-router";
 
 const router = createBrowserRouter([
   {

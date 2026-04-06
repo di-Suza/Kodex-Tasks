@@ -38,8 +38,8 @@ const Navbar = () => {
       <nav
         className={`fixed top-0 left-0 w-full z-50 transition-all h-16 duration-300 ${
           !isAtTop
-            ? "bg-black/80 backdrop-blur-md border-b border-white shadow-xl"
-            : "bg-transparent border-b border-transparent "
+            ? "bg-[#0D0D0D] backdrop-blur-md border-b border-white shadow-xl"
+            : "bg-[#0D0D0D] border-b border-transparent "
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">

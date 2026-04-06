@@ -21,7 +21,7 @@ const MainLayout = () => {
     return <Navigate to="/auth/login" replace />;
   }
   return (
-    <div className="min-h-screen bg-black text-white selection:bg-[#d4ff00]/30">
+    <div className="min-h-screen bg-[#0D0D0D] text-white selection:bg-[#d4ff00]/30">
       <Navbar />
       <main className="pt-20">
         <Outlet />
