@@ -8,7 +8,6 @@ export const ToastProvider = ({ children }) => {
 
   const showToast = useCallback((message, type = "success") => {
     setToast({ message, type });
-    // 3 second baad apne aap gayab ho jayega
     setTimeout(() => setToast(null), 3000);
   }, []);
 
