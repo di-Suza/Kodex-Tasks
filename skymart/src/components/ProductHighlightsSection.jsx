@@ -66,7 +66,7 @@ const ProductHighlightsSection = () => {
                     e.stopPropagation();
                     addToCart(item);
                   }}
-                  className="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-[#a3c700] hover:bg-[#f9ffdb]"
+                  className="w-8 h-8 cursor-pointer rounded-lg border border-gray-100 flex items-center justify-center text-[#a3c700] hover:bg-[#f9ffdb]"
                 >
                   <ShoppingBag size={14} />
                 </button>
@@ -110,7 +110,7 @@ const ProductHighlightsSection = () => {
                       e.stopPropagation();
                       addToCart(item);
                     }}
-                    className="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center text-[#a3c700] hover:bg-[#f9ffdb]"
+                    className="w-8 cursor-pointer h-8 rounded-lg border border-gray-100 flex items-center justify-center text-[#a3c700] hover:bg-[#f9ffdb]"
                   >
                     <ShoppingBag size={14} />
                   </button>
