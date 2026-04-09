@@ -1,0 +1,33 @@
+@import "tailwindcss";
+@font-face {
+  font-family: 'CustomFont'; 
+  src: url('./assets/fonts/first.woff2') format('truetype'); 
+  font-weight: normal;
+  font-style: normal;
+}
+:root {
+  --primary: #040609;
+  --secondary: #0a0e11;
+  --input: #191e24;
+  --accent: #1a8c74;
+  --text1: #eeeeee;
+  --text2: #000;
+
+  --border: #26292d;
+}
+
+.dark {
+  --primary: #f8f8f8;
+  --secondary: #ffffff;
+  --input: #ececec;
+  --accent: #0056a3;
+  --text1: #000;
+  --text2: #eeeeee;
+
+  --border: #d7d7d7;
+}
+
+body {
+  background: var(--primary);
+  font-family:CustomFont;
+}
