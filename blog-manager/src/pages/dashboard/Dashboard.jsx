@@ -1,7 +1,7 @@
 import { Plus, FileText } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../hooks/useAuth";
-import { useBlogs } from "../../hooks/useblog";
+import { useBlogs } from "../../hooks/useBlog";
 import DashboardBlogCard from "../../components/DashboardBlogCard";
 
 const Dashboard = () => {

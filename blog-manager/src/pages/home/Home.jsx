@@ -1,5 +1,5 @@
 import BlogCard from "../../components/BlogCard";
-import { useBlogs } from "../../hooks/useblog";
+import { useBlogs } from "../../hooks/useBlog";
 
 const Home = () => {
   const { publishedBlogs } = useBlogs();

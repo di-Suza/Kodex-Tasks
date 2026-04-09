@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, Save, Send, X } from "lucide-react";
 import { useNavigate } from "react-router";
-import { useBlogs } from "../../hooks/useblog";
+import { useBlogs } from "../../hooks/useBlog";
 
 const CreateBlog = () => {
   const navigate = useNavigate();

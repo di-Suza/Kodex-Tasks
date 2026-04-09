@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MoreHorizontal, Edit, Trash2, Eye, EyeOff } from "lucide-react";
-import { useBlogs } from "../hooks/useblog";
+import { useBlogs } from "../hooks/useBlog";
 import MenuButton from "./MenuButton";
 import { useNavigate } from "react-router";
 import DeleteModal from "./DeleteModal";

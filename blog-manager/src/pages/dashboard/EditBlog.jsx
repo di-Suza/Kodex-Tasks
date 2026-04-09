@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { ArrowLeft, Save, Send, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
-import { useBlogs } from "../../hooks/useblog";
+import { useBlogs } from "../../hooks/useBlog";
 
 const EditBlog = () => {
   const { id } = useParams();
