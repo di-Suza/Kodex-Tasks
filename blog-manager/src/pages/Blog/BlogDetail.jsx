@@ -90,7 +90,7 @@ const BlogDetail = () => {
                 </SyntaxHighlighter>
               ) : (
                 <code
-                  className="bg-gray-800 px-1.5 py-0.5 rounded text-(--accent)"
+                  className="bg-(--input) px-1.5 py-0.5 rounded text-(--accent)"
                   {...props}
                 >
                   {children}
