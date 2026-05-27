@@ -15,7 +15,9 @@ app.post("/api/notes", async (req, res) => {
     title.trim().length < 3 ||
     description.trim().length < 10
   ) {
-    return res.status(400).json({ error: "Invalid note data" });
+    return res
+      .status(400)
+      .json({ success: false, message: "Invalid note data" });
   }
 
   // create note in database
@@ -25,6 +27,17 @@ app.post("/api/notes", async (req, res) => {
     success: true,
     message: "Note created successfully",
     note,
+  });
+});
+
+// get all notes
+app.get("/api/notes", async (req, res) => {
+  const notes = await Notes.find();
+
+  return res.status(200).json({
+    success: true,
+    message: "Notes fetched successfully",
+    notes,
   });
 });
 
