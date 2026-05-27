@@ -1,5 +1,5 @@
 import app from "./src/app.js";
-import connectToDb from "./src/config/connectToDb.js";
+import connectToDb from "./src/configs/connectToDb.js";
 
 await connectToDb();
 
