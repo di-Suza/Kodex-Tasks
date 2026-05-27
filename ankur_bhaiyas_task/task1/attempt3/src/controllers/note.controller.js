@@ -23,3 +23,13 @@ export const createNote = async (req, res) => {
     note,
   });
 };
+
+export const getNotes = async (req, res) => {
+  const notes = await Notes.find();
+
+  return res.status(200).json({
+    success: true,
+    message: "Notes fetched successfully",
+    notes,
+  });
+};
