@@ -7,6 +7,6 @@ noteRouter
 
   .post("/create", createNote)
   .get("/get", getNotes)
-  .patch("/update", updateNote);
+  .patch("/update/:noteId", updateNote);
 
 export default noteRouter;

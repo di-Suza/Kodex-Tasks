@@ -1,4 +1,5 @@
 import Notes from "../models/note.model.js";
+import mongoose from "mongoose";
 
 export const createNote = async (req, res) => {
   const { title, description } = req.body;
@@ -32,4 +33,54 @@ export const getNotes = async (req, res) => {
     message: "Notes fetched successfully",
     notes,
   });
+};
+
+export const updateNote = async (req, res) => {
+  const { noteId } = req.params;
+  const { description } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(noteId)) {
+    return res.status(400).json({ success: false, message: "Invalid note ID" });
+  }
+  // validation
+  if (!description || description.trim().length < 10) {
+    return res
+      .status(400)
+      .json({ success: false, message: "Description is required!" });
+  }
+
+  const note = await Notes.findById(noteId);
+
+  if (!note) {
+    return res.status(404).json({ success: false, message: "Note not found" });
+  }
+
+  note.description = description;
+  await note.save();
+
+  return res.status(200).json({
+    success: true,
+    message: "Note updated successfully",
+    note,
+  });
+};
+
+export const deleteNote = async (req, res) => {
+  const { noteId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(noteId)) {
+    return res.status(400).json({ success: false, message: "Invalid note ID" });
+  }
+  try {
+    const note = await Notes.findByIdAndDelete(noteId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Note deleted successfully",
+    });
+  } catch (error) {
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
+  }
 };
