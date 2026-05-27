@@ -7,7 +7,6 @@ app.use(express.json());
 // create note
 app.post("/api/notes", async (req, res) => {
   const { title, description } = req.body;
-  fg;
   // validation
   if (
     !title ||
