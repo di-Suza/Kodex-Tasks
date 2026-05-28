@@ -1,7 +1,5 @@
 const User = require("../models/user.model");
 const { registerUserService } = require("../services/auth.service");
-const ApiError = require("../utils/apiError");
-const generateJwtToken = require("../utils/token");
 
 // register user
 const register = async (req, res, next) => {
