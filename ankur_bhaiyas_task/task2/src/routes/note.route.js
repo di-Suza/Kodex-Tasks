@@ -13,5 +13,7 @@ noteRouter.get("/notes", authMiddleware, controller.getNote);
 // update note
 noteRouter.patch("/note/:id" , authMiddleware ,  controller.updateNote);
 
+// delete note
+noteRouter.delete("/note/:id" , authMiddleware , controller.deleteNote)
 
 module.exports = noteRouter;

@@ -78,8 +78,26 @@ const updateNoteService = async ({ title, description }, id) => {
   return updatedNote;
 };
 
+
+
+// delete note by id
+const deleteNoteService = async (id)=>{
+  if (!id) {
+    throw new AppError(400, "Note id is required");
+  }
+
+  const deletedNote = await Notes.findByIdAndDelete(id);
+
+  if (!deletedNote) {
+    throw new AppError(404, "Note not found");
+  }
+
+  return deletedNote;
+}
+
 module.exports = {
   createNoteService,
   getNoteService,
   updateNoteService,
+  deleteNoteService
 };
