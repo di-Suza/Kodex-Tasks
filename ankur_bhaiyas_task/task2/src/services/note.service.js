@@ -36,7 +36,50 @@ const getNoteService = async () => {
   return notes;
 };
 
+// validate and update data by id
+const updateNoteService = async ({ title, description }, id) => {
+  if (!id) {
+    throw new AppError(400, "Note id is required");
+  }
+
+  if (!title && !description) {
+    throw new AppError(400, "Title or description is required");
+  }
+
+  const updateData = {};
+
+  if (title) {
+    if (title.trim().length < 3) {
+      throw new AppError(400, "Title must be at least 3 characters long");
+    }
+
+    updateData.title = title;
+  }
+
+  if (description) {
+    if (description.trim().length < 10) {
+      throw new AppError(
+        400,
+        "Description must be at least 10 characters long",
+      );
+    }
+
+    updateData.description = description;
+  }
+
+  const updatedNote = await Notes.findByIdAndUpdate(id, updateData, {
+    new: true,
+  });
+
+  if (!updatedNote) {
+    throw new AppError(404, "Note not found");
+  }
+
+  return updatedNote;
+};
+
 module.exports = {
   createNoteService,
   getNoteService,
+  updateNoteService,
 };

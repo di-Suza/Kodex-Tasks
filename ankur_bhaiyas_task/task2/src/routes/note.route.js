@@ -10,6 +10,8 @@ noteRouter.post("/notes", authMiddleware, controller.createNote);
 // get all notes
 noteRouter.get("/notes", authMiddleware, controller.getNote);
 
+// update note
+noteRouter.patch("/note/:id" , authMiddleware ,  controller.updateNote);
 
 
 module.exports = noteRouter;

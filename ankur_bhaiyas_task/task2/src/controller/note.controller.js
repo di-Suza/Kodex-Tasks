@@ -1,6 +1,7 @@
 const {
   createNoteService,
   getNoteService,
+  updateNoteService,
 } = require("../services/note.service");
 
 // create note
@@ -21,7 +22,19 @@ const getNote = async (req, res) => {
   });
 };
 
+
+// update note using user id
+const updateNote = async (req , res) =>{
+    let updatedNote = await  updateNoteService(req.body , req.params.id);
+    return res.status(200).json({
+        message:"Note updated successfully",
+        updatedNote
+    })
+}
+
+
 module.exports = {
   createNote,
   getNote,
+  updateNote
 };
