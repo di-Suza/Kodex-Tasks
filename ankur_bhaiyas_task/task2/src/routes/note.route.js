@@ -4,7 +4,12 @@ const controller = require("../controller/note.controller");
 
 const noteRouter = express.Router();
 
-//create note route
-noteRouter.post("/note", authMiddleware, controller.createNoteController);
+//create note 
+noteRouter.post("/notes", authMiddleware, controller.createNote);
+
+// get all notes
+noteRouter.get("/notes", authMiddleware, controller.getNote);
+
+
 
 module.exports = noteRouter;

@@ -29,3 +29,14 @@ const createNoteService = async ({ title, description }, user) => {
 
   return note;
 };
+
+// get all notes from the db
+const getNoteService = async () => {
+  let notes = await Notes.find();
+  return notes;
+};
+
+module.exports = {
+  createNoteService,
+  getNoteService,
+};
