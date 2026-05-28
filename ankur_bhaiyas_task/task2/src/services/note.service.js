@@ -27,5 +27,5 @@ const createNoteService = async ({ title, description }, user) => {
     user: user.email,
   });
 
-  return { note };
+  return note;
 };
