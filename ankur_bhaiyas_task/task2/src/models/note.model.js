@@ -17,5 +17,5 @@ const noteSchema = new mongoose.Schema(
 );
 
 // Note collection model.
-const Note = mongoose.model("notes", noteSchema);
-module.exports = Note;
+const Notes = mongoose.model("notes", noteSchema);
+module.exports = Notes;
