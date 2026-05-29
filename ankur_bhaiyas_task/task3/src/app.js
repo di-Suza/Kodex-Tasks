@@ -1,5 +1,5 @@
 import express from 'express';
-import globalErrorHandler from './middlewares/globalErrorHandler.middleware';
+import globalErrorHandler from './middlewares/globalErrorHandler.middleware.js';
 
 const app = express();
 app.use(express.json());
