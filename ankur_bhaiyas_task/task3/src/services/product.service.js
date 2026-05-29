@@ -120,3 +120,24 @@ export const updateProductService = async (productId, productData, files, user) 
 
   return product;
 };
+
+export const deleteProductService = async (productId, user) => {
+  const product = await Products.findById(productId);
+
+  if (!product) {
+    throw new AppError(404, "Product not found");
+  }
+
+  if (product.user.toString() !== user._id.toString()) {
+    throw new AppError(403, "You are not allowed to delete this product");
+  }
+
+  // Delete all product images from ImageKit
+  const deletePromises = product.images.map((image) => {
+    return deleteImageFromImageKit(image.fileId);
+  });
+
+  await Promise.all(deletePromises);
+
+  await product.deleteOne();
+};

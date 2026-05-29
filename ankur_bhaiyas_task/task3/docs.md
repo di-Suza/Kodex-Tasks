@@ -562,6 +562,7 @@ Current route:
 - `GET /:id`
 - `POST /`
 - `PUT /:id`
+- `DELETE /:id`
 
 Get all products route pipeline:
 
@@ -631,6 +632,21 @@ Meaning:
 5. Text fields are updated if provided.
 6. If new images are provided, old ImageKit files are deleted and new images are uploaded.
 7. If validation fails, global error handler sends response.
+
+Delete product route pipeline:
+
+```js
+productRouter.delete("/:id", authMiddleware, validateProductId, deleteProduct);
+```
+
+Meaning:
+
+1. First auth middleware verifies the logged-in user.
+2. Product id route param is validated.
+3. Service checks product existence and ownership.
+4. Product images are deleted from ImageKit using saved `fileId`.
+5. Product document is deleted from MongoDB.
+6. If validation fails, global error handler sends response.
 
 ## 9. Register API
 
@@ -2444,7 +2460,229 @@ Example:
 }
 ```
 
-## 16. Logout API
+## 16. Delete Product API
+
+### Endpoint
+
+`DELETE /api/v1/products/:id`
+
+### Purpose
+
+Delete a product owned by the logged-in user and remove all product images from ImageKit.
+
+### Authentication Required
+
+Yes.
+
+This API needs the `token` cookie. The auth middleware verifies the token and attaches the logged-in user to `req.user`.
+
+### Route Parameters
+
+- `id`
+  - Required
+  - Must be a valid MongoDB ObjectId
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/product.route.js`
+
+The request first reaches:
+
+```js
+DELETE /api/v1/products/:id
+```
+
+The route uses:
+
+- `authMiddleware`
+- `validateProductId`
+- `deleteProduct`
+
+#### Step 2: Auth Middleware Runs
+
+File:
+
+`src/middlewares/auth.middleware.js`
+
+Auth middleware checks:
+
+- Token must exist in cookies.
+- Token must not be blacklisted in Redis.
+- Token must be valid using `verifyToken`.
+- User must exist in MongoDB.
+
+If everything is valid:
+
+- User is fetched from database using decoded token id.
+- Full user document is attached to `req.user`.
+- Request moves to validation middleware.
+
+#### Step 3: Param Validation Runs
+
+File:
+
+`src/validations/product.validation.js`
+
+Validation checks:
+
+- `id` must be a valid MongoDB ObjectId.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 4: Controller Runs
+
+File:
+
+`src/controllers/product.controller.js`
+
+Controller function:
+
+```js
+deleteProduct
+```
+
+Controller responsibility:
+
+- Read product id from `req.params.id`.
+- Read logged-in user from `req.user`.
+- Call `deleteProductService`.
+- Send final success response.
+
+#### Step 5: Service Checks Product
+
+File:
+
+`src/services/product.service.js`
+
+Service function:
+
+```js
+deleteProductService
+```
+
+Product checks:
+
+1. Find product using `Products.findById(productId)`.
+2. If product does not exist, throw `AppError(404, "Product not found")`.
+3. Compare `product.user` with `req.user._id`.
+4. If product does not belong to logged-in user, throw `AppError(403, "You are not allowed to delete this product")`.
+
+#### Step 6: Product Images Are Deleted
+
+Before deleting the product document, all images are deleted from ImageKit using saved `fileId`.
+
+Delete logic:
+
+```js
+const deletePromises = product.images.map((image) => {
+  return deleteImageFromImageKit(image.fileId);
+});
+
+await Promise.all(deletePromises);
+```
+
+Why `Promise.all` is used:
+
+- Multiple images are deleted in parallel.
+- It is faster than deleting one image at a time.
+- Product document is deleted only after image deletion finishes.
+
+#### Step 7: Product Document Is Deleted
+
+After images are deleted:
+
+```js
+await product.deleteOne();
+```
+
+#### Step 8: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Product deleted successfully"
+}
+```
+
+### Error Responses
+
+#### Missing Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized user"
+}
+```
+
+#### Invalid Product ID
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product id"
+}
+```
+
+#### Product Not Found
+
+Status:
+
+`404 Not Found`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product not found"
+}
+```
+
+#### Product Does Not Belong To User
+
+Status:
+
+`403 Forbidden`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "You are not allowed to delete this product"
+}
+```
+
+## 17. Logout API
 
 ### Endpoint
 

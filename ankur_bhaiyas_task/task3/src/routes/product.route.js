@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createProduct,
+  deleteProduct,
   getAllProducts,
   getProductById,
   updateProduct,
@@ -39,5 +40,8 @@ productRouter.put(
   validateUpdateProduct,
   updateProduct,
 );
+
+// Delete product by id
+productRouter.delete("/:id", authMiddleware, validateProductId, deleteProduct);
 
 export default productRouter;

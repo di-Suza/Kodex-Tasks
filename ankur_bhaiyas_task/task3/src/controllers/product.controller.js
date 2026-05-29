@@ -1,5 +1,6 @@
 import {
   createProductService,
+  deleteProductService,
   getAllProductsService,
   getProductByIdService,
   updateProductService,
@@ -57,5 +58,14 @@ export const updateProduct = catchAsync(async (req, res) => {
     data: {
       product,
     },
+  });
+});
+
+export const deleteProduct = catchAsync(async (req, res) => {
+  await deleteProductService(req.params.id, req.user);
+
+  res.status(200).json({
+    success: true,
+    message: "Product deleted successfully",
   });
 });
