@@ -2,10 +2,11 @@ import { AppError } from "../utils/appError.js";
 import { catchAsync } from "../utils/catchAsync.js";
 import { verifyToken } from "../utils/token.js";
 import redisClient from "../configs/cache.js";
+import Users from "../models/user.model.js";
 
 const getTokenFromRequest = (req) => {
   // Read token from cookies only
-  return req.cookies?.token || req.cookies?.JWT_TOKEN;
+  return req.cookies?.token;
 };
 
 const isTokenBlacklisted = async (req, token) => {
@@ -46,8 +47,14 @@ export const authMiddleware = catchAsync(async (req, res, next) => {
   const decodedToken = await verifyToken(token);
   const decoded = decodedToken.data;
 
-  // Attach logged-in user data to request
-  req.user = decoded.user || decoded;
+  const user = await Users.findById(decoded.id);
+
+  if (!user) {
+    throw new AppError(404, "User not found");
+  }
+
+  // Attach logged-in user data from database
+  req.user = user;
 
   next();
 });

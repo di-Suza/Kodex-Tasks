@@ -630,20 +630,3 @@ Example:
   "message": "User already exists"
 }
 ```
-
-## 10. Documentation Update Rule
-
-Whenever I add a new API, I will update this file with:
-
-- Route
-- Method
-- Purpose
-- Authentication requirement
-- Required fields
-- Request body
-- End-to-end flow
-- Controller logic
-- Service logic
-- Utilities used
-- Example response
-- Error responses
