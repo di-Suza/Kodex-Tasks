@@ -396,6 +396,7 @@ Current validation:
 - `validateCreateProduct`
 - `validateGetAllProducts`
 - `validateProductId`
+- `validateUpdateProduct`
 
 Create product rules:
 
@@ -424,6 +425,32 @@ Product id rules:
 - `id`
   - Required in route params
   - Must be a valid MongoDB ObjectId
+
+At the end, it uses `handleValidationErrors` middleware.
+
+Update product rules:
+
+- `id`
+  - Required in route params
+  - Must be a valid MongoDB ObjectId
+
+- `name`
+  - Optional
+  - Trimmed
+  - Minimum 2 characters if provided
+
+- `price`
+  - Optional
+  - Must be greater than 0 if provided
+  - Converted to number
+
+- `category`
+  - Optional
+  - Must be one of allowed product categories
+
+- `description`
+  - Optional
+  - Trimmed
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -534,6 +561,7 @@ Current route:
 - `GET /`
 - `GET /:id`
 - `POST /`
+- `PUT /:id`
 
 Get all products route pipeline:
 
@@ -581,6 +609,28 @@ Meaning:
 3. Product request body is validated.
 4. If validation passes, create product controller runs.
 5. If validation fails, global error handler sends response.
+
+Update product route pipeline:
+
+```js
+productRouter.put(
+  "/:id",
+  authMiddleware,
+  upload.array("images"),
+  validateUpdateProduct,
+  updateProduct,
+);
+```
+
+Meaning:
+
+1. First auth middleware verifies the logged-in user.
+2. Multer accepts new product images from `images` field if provided.
+3. Product id and body fields are validated.
+4. Service checks product existence and ownership.
+5. Text fields are updated if provided.
+6. If new images are provided, old ImageKit files are deleted and new images are uploaded.
+7. If validation fails, global error handler sends response.
 
 ## 9. Register API
 
@@ -1993,7 +2043,408 @@ Example:
 }
 ```
 
-## 15. Logout API
+## 15. Update Product API
+
+### Endpoint
+
+`PUT /api/v1/products/:id`
+
+### Purpose
+
+Update a product owned by the logged-in user. This API supports text-only updates and image replacement updates.
+
+### Authentication Required
+
+Yes.
+
+This API needs the `token` cookie. The auth middleware verifies the token and attaches the logged-in user to `req.user`.
+
+### Content Type
+
+`multipart/form-data`
+
+### Route Parameters
+
+- `id`
+  - Required
+  - Must be a valid MongoDB ObjectId
+
+### Optional Fields
+
+- `name`
+- `description`
+- `price`
+- `category`
+- `images`
+
+At least one text field or one image must be provided.
+
+Allowed category values:
+
+- `electronics`
+- `clothing`
+- `books`
+- `home`
+- `beauty`
+- `sports`
+
+### Update Behavior
+
+#### Text-Only Update
+
+If the request contains only text fields:
+
+- Product existence is checked.
+- Product ownership is checked.
+- Only provided text fields are updated.
+- Old `images` array stays unchanged.
+
+#### Image Update
+
+If the request contains new images:
+
+- Product existence is checked.
+- Product ownership is checked.
+- Old images are deleted from ImageKit using saved `fileId`.
+- New images are uploaded to ImageKit.
+- Product `images` array is replaced with new `{ url, fileId }` objects.
+
+ImageKit folder path:
+
+```js
+/${user._id}/${product._id}
+```
+
+### Example Request Body
+
+Form-data fields for text-only update:
+
+```json
+{
+  "name": "Updated Headphones",
+  "price": 3499,
+  "category": "electronics"
+}
+```
+
+Form-data fields for image update:
+
+```json
+{
+  "images": ["new-image1.jpg", "new-image2.jpg"]
+}
+```
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/product.route.js`
+
+The request first reaches:
+
+```js
+PUT /api/v1/products/:id
+```
+
+The route uses:
+
+- `authMiddleware`
+- `upload.array("images")`
+- `validateUpdateProduct`
+- `updateProduct`
+
+#### Step 2: Auth Middleware Runs
+
+File:
+
+`src/middlewares/auth.middleware.js`
+
+Auth middleware checks:
+
+- Token must exist in cookies.
+- Token must not be blacklisted in Redis.
+- Token must be valid using `verifyToken`.
+- User must exist in MongoDB.
+
+If everything is valid:
+
+- User is fetched from database using decoded token id.
+- Full user document is attached to `req.user`.
+- Request moves to multer middleware.
+
+#### Step 3: Multer Middleware Runs
+
+File:
+
+`src/middlewares/multer.middleware.js`
+
+Multer setup:
+
+```js
+upload.array("images")
+```
+
+Purpose:
+
+- Accept new image files if provided.
+- Put uploaded files inside `req.files`.
+- Reject non-image files using `AppError`.
+- Limit each file size to 5MB.
+
+#### Step 4: Validation Runs
+
+File:
+
+`src/validations/product.validation.js`
+
+Validation checks:
+
+- `id` must be a valid MongoDB ObjectId.
+- `name` must be at least 2 characters if provided.
+- `price` must be greater than 0 if provided.
+- `category` must match allowed category values if provided.
+- `description` is optional and trimmed.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 5: Controller Runs
+
+File:
+
+`src/controllers/product.controller.js`
+
+Controller function:
+
+```js
+updateProduct
+```
+
+Controller responsibility:
+
+- Read product id from `req.params.id`.
+- Read text fields from `req.body`.
+- Read uploaded files from `req.files`.
+- Read logged-in user from `req.user`.
+- Call `updateProductService`.
+- Send final success response.
+
+#### Step 6: Service Checks Product
+
+File:
+
+`src/services/product.service.js`
+
+Service function:
+
+```js
+updateProductService
+```
+
+Product checks:
+
+1. Find product using `Products.findById(productId)`.
+2. If product does not exist, throw `AppError(404, "Product not found")`.
+3. Compare `product.user` with `req.user._id`.
+4. If product does not belong to logged-in user, throw `AppError(403, "You are not allowed to update this product")`.
+5. If no text fields and no images are provided, throw `AppError(400, "Please provide product data to update")`.
+
+#### Step 7: Text Fields Are Updated
+
+Only provided fields are updated:
+
+- `name`
+- `description`
+- `price`
+- `category`
+
+If a field is not provided, old value remains unchanged.
+
+#### Step 8: Images Are Replaced If Provided
+
+If `req.files` has new images:
+
+1. Old product images are deleted from ImageKit using their saved `fileId`.
+2. New images are uploaded to ImageKit in parallel using `Promise.all`.
+3. Product `images` array is replaced with new image objects.
+
+Old image delete logic:
+
+```js
+const deletePromises = product.images.map((image) => {
+  return deleteImageFromImageKit(image.fileId);
+});
+
+await Promise.all(deletePromises);
+```
+
+New image upload logic:
+
+```js
+const uploadPromises = files.map((file) => {
+  return uploadImageToImageKit(file, folder);
+});
+
+product.images = await Promise.all(uploadPromises);
+```
+
+#### Step 9: Product Is Saved
+
+After text/image updates:
+
+```js
+await product.save();
+```
+
+#### Step 10: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Product updated successfully",
+  "data": {
+    "product": {
+      "_id": "PRODUCT_ID",
+      "user": "USER_ID",
+      "name": "Updated Headphones",
+      "description": "Noise cancelling bluetooth headphones",
+      "price": 3499,
+      "category": "electronics",
+      "images": [
+        {
+          "url": "https://ik.imagekit.io/example/new-image1.jpg",
+          "fileId": "NEW_IMAGEKIT_FILE_ID_1"
+        }
+      ],
+      "createdAt": "DATE",
+      "updatedAt": "DATE"
+    }
+  }
+}
+```
+
+### Error Responses
+
+#### Missing Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized user"
+}
+```
+
+#### Invalid Product ID
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product id"
+}
+```
+
+#### No Update Data
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Please provide product data to update"
+}
+```
+
+#### Invalid Category
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product category"
+}
+```
+
+#### Product Not Found
+
+Status:
+
+`404 Not Found`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product not found"
+}
+```
+
+#### Product Does Not Belong To User
+
+Status:
+
+`403 Forbidden`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "You are not allowed to update this product"
+}
+```
+
+#### Invalid File Type
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Please attach only image files!"
+}
+```
+
+## 16. Logout API
 
 ### Endpoint
 

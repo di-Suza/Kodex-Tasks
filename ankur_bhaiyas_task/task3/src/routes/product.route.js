@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProducts,
   getProductById,
+  updateProduct,
 } from "../controllers/product.controller.js";
 import { authMiddleware } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -10,6 +11,7 @@ import {
   validateCreateProduct,
   validateGetAllProducts,
   validateProductId,
+  validateUpdateProduct,
 } from "../validations/product.validation.js";
 
 const productRouter = express.Router();
@@ -27,6 +29,15 @@ productRouter.post(
   upload.array("images"),
   validateCreateProduct,
   createProduct,
+);
+
+// Update product by id
+productRouter.put(
+  "/:id",
+  authMiddleware,
+  upload.array("images"),
+  validateUpdateProduct,
+  updateProduct,
 );
 
 export default productRouter;

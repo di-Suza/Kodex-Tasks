@@ -1,6 +1,9 @@
 import Products from "../models/product.model.js";
 import { AppError } from "../utils/appError.js";
-import { uploadImageToImageKit } from "../utils/uploadImage.js";
+import {
+  deleteImageFromImageKit,
+  uploadImageToImageKit,
+} from "../utils/uploadImage.js";
 
 const PRODUCTS_PER_PAGE = 20;
 
@@ -65,6 +68,55 @@ export const getProductByIdService = async (productId) => {
   if (!product) {
     throw new AppError(404, "Product not found");
   }
+
+  return product;
+};
+
+export const updateProductService = async (productId, productData, files, user) => {
+  const product = await Products.findById(productId);
+
+  if (!product) {
+    throw new AppError(404, "Product not found");
+  }
+
+  if (product.user.toString() !== user._id.toString()) {
+    throw new AppError(403, "You are not allowed to update this product");
+  }
+
+  const hasTextFields = ["name", "description", "price", "category"].some(
+    (field) => productData[field] !== undefined,
+  );
+  const hasImages = files && files.length > 0;
+
+  if (!hasTextFields && !hasImages) {
+    throw new AppError(400, "Please provide product data to update");
+  }
+
+  // Update text fields only if provided
+  if (productData.name !== undefined) product.name = productData.name;
+  if (productData.description !== undefined) product.description = productData.description;
+  if (productData.price !== undefined) product.price = productData.price;
+  if (productData.category !== undefined) product.category = productData.category;
+
+  if (hasImages) {
+    const folder = `/${user._id}/${product._id}`;
+
+    // Delete old images before replacing them
+    const deletePromises = product.images.map((image) => {
+      return deleteImageFromImageKit(image.fileId);
+    });
+
+    await Promise.all(deletePromises);
+
+    // Upload new images in parallel
+    const uploadPromises = files.map((file) => {
+      return uploadImageToImageKit(file, folder);
+    });
+
+    product.images = await Promise.all(uploadPromises);
+  }
+
+  await product.save();
 
   return product;
 };

@@ -64,3 +64,35 @@ export const validateProductId = [
 
   handleValidationErrors,
 ];
+
+export const validateUpdateProduct = [
+  // Validate product id param
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid product id"),
+
+  // Validate product name if provided
+  body("name")
+    .optional({ checkFalsy: true })
+    .trim()
+    .isLength({ min: 2 })
+    .withMessage("Product name must be at least 2 characters"),
+
+  // Validate product price if provided
+  body("price")
+    .optional({ checkFalsy: true })
+    .isFloat({ gt: 0 })
+    .withMessage("Product price must be greater than 0")
+    .toFloat(),
+
+  // Validate product category if provided
+  body("category")
+    .optional({ checkFalsy: true })
+    .isIn(productCategories)
+    .withMessage("Invalid product category"),
+
+  // Clean optional description
+  body("description").optional({ checkFalsy: true }).trim(),
+
+  handleValidationErrors,
+];
