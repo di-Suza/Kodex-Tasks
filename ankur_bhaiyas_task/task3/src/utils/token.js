@@ -35,7 +35,7 @@ const verifyToken = (token) => {
 
     const options = {
       algorithms: ["RS256"],
-      issuer: "DevloopFeed",
+      issuer: "EcommerceAPI",
     };
 
     jwt.verify(token, publicKey, options, (err, decoded) => {

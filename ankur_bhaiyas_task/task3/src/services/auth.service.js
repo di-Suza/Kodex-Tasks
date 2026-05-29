@@ -1,7 +1,10 @@
 import Users from "../models/user.model.js";
+import redisClient from "../configs/cache.js";
 import { AppError } from "../utils/appError.js";
 import { compareHash, generateHash } from "../utils/password.js";
 import { generateToken } from "../utils/token.js";
+
+const TOKEN_BLACKLIST_TTL = 60 * 60;
 
 export const registerUserService = async (userData) => {
   const { name, email, password } = userData;
@@ -60,4 +63,13 @@ export const loginUserService = async (loginData) => {
 export const getMeService = (user) => {
   // Return logged-in user from auth middleware
   return user.toObject();
+};
+
+export const logoutUserService = async (token) => {
+  if (!token) {
+    throw new AppError(401, "Unauthorized user");
+  }
+
+  // Add token to Redis blacklist until it expires
+  await redisClient.set(`blacklist:${token}`, "true", "EX", TOKEN_BLACKLIST_TTL);
 };

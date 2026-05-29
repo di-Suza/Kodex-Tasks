@@ -60,6 +60,7 @@ Purpose:
 - Create a Redis client.
 - Used for token blacklist checks.
 - Helps support logout/session invalidation flow.
+- Stores logged-out tokens until token expiry.
 
 Libraries used:
 
@@ -376,6 +377,7 @@ Current route:
 - `POST /register`
 - `POST /login`
 - `GET /me`
+- `POST /logout`
 
 Register route pipeline:
 
@@ -412,6 +414,19 @@ Meaning:
 1. First auth middleware checks the token from cookies.
 2. If token is valid, logged-in user is attached to `req.user`.
 3. Then getMe controller sends the logged-in user data.
+
+Logout route pipeline:
+
+```js
+userRouter.post("/logout", authMiddleware, logout);
+```
+
+Meaning:
+
+1. First auth middleware checks the token from cookies.
+2. If token is valid, logout controller runs.
+3. Logout service adds token to Redis blacklist.
+4. Controller clears the token cookie.
 
 ### Product Routes
 
@@ -1063,6 +1078,200 @@ Example:
 ```
 
 #### Blacklisted Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Token has been blacklisted"
+}
+```
+
+#### User Not Found
+
+Status:
+
+`404 Not Found`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "User not found"
+}
+```
+
+## 12. Logout API
+
+### Endpoint
+
+`POST /api/v1/users/logout`
+
+### Purpose
+
+Logout the currently logged-in user by clearing the auth cookie and blacklisting the current token in Redis.
+
+### Authentication Required
+
+Yes.
+
+This API needs the `token` cookie. The token is verified by auth middleware before logout logic runs.
+
+### Required Fields
+
+No request body is required.
+
+### Cookie Required
+
+- `token`
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/user.route.js`
+
+The request first reaches:
+
+```js
+POST /api/v1/users/logout
+```
+
+The route uses:
+
+- `authMiddleware`
+- `logout`
+
+#### Step 2: Auth Middleware Runs
+
+File:
+
+`src/middlewares/auth.middleware.js`
+
+Auth middleware checks:
+
+- Token must exist in cookies.
+- Token must not already be blacklisted in Redis.
+- Token must be valid using `verifyToken`.
+- User must exist in MongoDB.
+
+If everything is valid:
+
+- User is fetched from database using decoded token id.
+- Full user document is attached to `req.user`.
+- Request moves to logout controller.
+
+If authentication fails:
+
+- `AppError` is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 3: Controller Runs
+
+File:
+
+`src/controllers/auth.controller.js`
+
+Controller function:
+
+```js
+logout
+```
+
+Controller responsibility:
+
+- Read token from cookies.
+- Call `logoutUserService`.
+- Clear the `token` cookie.
+- Send final success response.
+
+#### Step 4: Service Blacklists Token
+
+File:
+
+`src/services/auth.service.js`
+
+Service function:
+
+```js
+logoutUserService
+```
+
+Service responsibility:
+
+1. Receive current token from controller.
+2. If token is missing, throw `AppError(401, "Unauthorized user")`.
+3. Store token in Redis blacklist using key format `blacklist:<token>`.
+4. Set blacklist expiry to 1 hour, matching current token/cookie lifetime.
+
+Redis blacklist value:
+
+```js
+await redisClient.set(`blacklist:${token}`, "true", "EX", 60 * 60);
+```
+
+Why Redis blacklist is used:
+
+- Clearing the cookie removes token from browser.
+- But the JWT can still be technically valid until expiry.
+- Redis blacklist blocks that token if someone tries to reuse it before expiry.
+
+#### Step 5: Cookie Is Cleared
+
+File:
+
+`src/controllers/auth.controller.js`
+
+Cookie cleared:
+
+- Cookie name: `token`
+- `httpOnly: true`
+- `secure: true` only in production
+- `sameSite: strict`
+
+#### Step 6: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "User logged out successfully"
+}
+```
+
+### Error Responses
+
+#### Missing Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized user"
+}
+```
+
+#### Already Blacklisted Token
 
 Status:
 

@@ -3,6 +3,7 @@
 import {
   getMeService,
   loginUserService,
+  logoutUserService,
   registerUserService,
 } from "../services/auth.service.js";
 import { catchAsync } from "../utils/catchAsync.js";
@@ -56,5 +57,23 @@ export const getMe = catchAsync(async (req, res) => {
     data: {
       user,
     },
+  });
+});
+
+export const logout = catchAsync(async (req, res) => {
+  const token = req.cookies?.token;
+
+  await logoutUserService(token);
+
+  // Remove token cookie from browser
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "User logged out successfully",
   });
 });
