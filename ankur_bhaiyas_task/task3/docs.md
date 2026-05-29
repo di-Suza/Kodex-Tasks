@@ -116,6 +116,12 @@ File:
 
 Fields:
 
+- `user`
+  - MongoDB ObjectId
+  - Required
+  - References `User`
+  - Stores the owner/creator of the product
+
 - `name`
   - String
   - Required
@@ -142,14 +148,17 @@ Fields:
 - `images`
   - Array of objects
   - Each object stores `url` and `fileId`
+  - `url` is the ImageKit image URL
+  - `fileId` is the ImageKit file id used for deletion
   - Default empty array
 
 Purpose:
 
 - Store ecommerce product data.
 - Support multiple image uploads.
-- Support ImageKit file deletion later using `fileId`.
-- Support category filtering later.
+- Link each product with the user who created it.
+- Support ImageKit file deletion using `fileId`.
+- Support category filtering.
 
 ## 5. Utilities
 
@@ -243,15 +252,29 @@ Purpose:
 - Upload a single image file to ImageKit.
 - Convert multer memory buffer into base64 before upload.
 - Return uploaded image URL and ImageKit file id for saving in product document.
+- Delete old product images from ImageKit using saved file id.
 
-Function:
+Functions:
 
 - `uploadImageToImageKit`
+- `deleteImageFromImageKit`
 
 Why this utility was created:
 
 - Product service can focus on business logic.
-- ImageKit upload logic stays reusable for future image upload features.
+- ImageKit upload/delete logic stays reusable for product create, update, and delete flows.
+
+### ImageKit Configuration
+
+File:
+
+`src/configs/storage.js`
+
+Purpose:
+
+- Load ImageKit environment variables using `dotenv`.
+- Configure ImageKit with public key, private key, and URL endpoint.
+- Export configured ImageKit instance for upload/delete utilities.
 
 ## 6. Middleware
 
@@ -312,8 +335,7 @@ Library used:
 
 - `multer`
 
-This will be used later for product image upload APIs.
-For product creation, it is used with:
+For product creation and update, it is used with:
 
 ```js
 upload.array("images")
@@ -381,6 +403,18 @@ Register rules:
 
 At the end, it uses `handleValidationErrors` middleware.
 
+Login rules:
+
+- `email`
+  - Required
+  - Must be valid email
+  - Normalized
+
+- `password`
+  - Required
+
+At the end, it uses `handleValidationErrors` middleware.
+
 ### Product Validation
 
 File:
@@ -437,20 +471,24 @@ Update product rules:
 - `name`
   - Optional
   - Trimmed
+  - Cannot be empty if provided
   - Minimum 2 characters if provided
 
 - `price`
   - Optional
+  - Cannot be empty if provided
   - Must be greater than 0 if provided
   - Converted to number
 
 - `category`
   - Optional
+  - Cannot be empty if provided
   - Must be one of allowed product categories
 
 - `description`
   - Optional
   - Trimmed
+  - Can be empty if the user wants to clear description
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -463,18 +501,6 @@ Get all products rules:
 - `page`
   - Optional
   - Must be a positive number
-
-At the end, it uses `handleValidationErrors` middleware.
-
-Login rules:
-
-- `email`
-  - Required
-  - Must be valid email
-  - Normalized
-
-- `password`
-  - Required
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -630,7 +656,7 @@ Meaning:
 3. Product id and body fields are validated.
 4. Service checks product existence and ownership.
 5. Text fields are updated if provided.
-6. If new images are provided, old ImageKit files are deleted and new images are uploaded.
+6. If new images are provided, new files are uploaded first and old ImageKit files are deleted after upload succeeds.
 7. If validation fails, global error handler sends response.
 
 Delete product route pipeline:
@@ -2121,8 +2147,8 @@ If the request contains new images:
 
 - Product existence is checked.
 - Product ownership is checked.
-- Old images are deleted from ImageKit using saved `fileId`.
-- New images are uploaded to ImageKit.
+- New images are uploaded to ImageKit first.
+- Old images are deleted from ImageKit using saved `fileId` only after new upload succeeds.
 - Product `images` array is replaced with new `{ url, fileId }` objects.
 
 ImageKit folder path:
@@ -2219,10 +2245,10 @@ File:
 Validation checks:
 
 - `id` must be a valid MongoDB ObjectId.
-- `name` must be at least 2 characters if provided.
-- `price` must be greater than 0 if provided.
-- `category` must match allowed category values if provided.
-- `description` is optional and trimmed.
+- `name` cannot be empty and must be at least 2 characters if provided.
+- `price` cannot be empty and must be greater than 0 if provided.
+- `category` cannot be empty and must match allowed category values if provided.
+- `description` is optional, trimmed, and can be cleared.
 
 If validation fails:
 
@@ -2281,14 +2307,25 @@ Only provided fields are updated:
 - `category`
 
 If a field is not provided, old value remains unchanged.
+If `description` is provided as empty, it can clear the old description.
 
 #### Step 8: Images Are Replaced If Provided
 
 If `req.files` has new images:
 
-1. Old product images are deleted from ImageKit using their saved `fileId`.
-2. New images are uploaded to ImageKit in parallel using `Promise.all`.
+1. New images are uploaded to ImageKit in parallel using `Promise.all`.
+2. If new upload succeeds, old product images are deleted from ImageKit using their saved `fileId`.
 3. Product `images` array is replaced with new image objects.
+
+New image upload logic:
+
+```js
+const uploadPromises = files.map((file) => {
+  return uploadImageToImageKit(file, folder);
+});
+
+const newImages = await Promise.all(uploadPromises);
+```
 
 Old image delete logic:
 
@@ -2298,16 +2335,8 @@ const deletePromises = product.images.map((image) => {
 });
 
 await Promise.all(deletePromises);
-```
 
-New image upload logic:
-
-```js
-const uploadPromises = files.map((file) => {
-  return uploadImageToImageKit(file, folder);
-});
-
-product.images = await Promise.all(uploadPromises);
+product.images = newImages;
 ```
 
 #### Step 9: Product Is Saved

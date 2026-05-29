@@ -73,21 +73,27 @@ export const validateUpdateProduct = [
 
   // Validate product name if provided
   body("name")
-    .optional({ checkFalsy: true })
     .trim()
+    .optional()
+    .notEmpty()
+    .withMessage("Product name cannot be empty")
     .isLength({ min: 2 })
     .withMessage("Product name must be at least 2 characters"),
 
   // Validate product price if provided
   body("price")
-    .optional({ checkFalsy: true })
+    .optional()
+    .notEmpty()
+    .withMessage("Product price cannot be empty")
     .isFloat({ gt: 0 })
     .withMessage("Product price must be greater than 0")
     .toFloat(),
 
   // Validate product category if provided
   body("category")
-    .optional({ checkFalsy: true })
+    .optional()
+    .notEmpty()
+    .withMessage("Product category cannot be empty")
     .isIn(productCategories)
     .withMessage("Invalid product category"),
 

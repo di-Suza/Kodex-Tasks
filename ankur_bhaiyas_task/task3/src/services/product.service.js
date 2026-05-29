@@ -83,9 +83,9 @@ export const updateProductService = async (productId, productData, files, user) 
     throw new AppError(403, "You are not allowed to update this product");
   }
 
-  const hasTextFields = ["name", "description", "price", "category"].some(
-    (field) => productData[field] !== undefined,
-  );
+  const hasTextFields = ["name", "description", "price", "category"].some((field) => {
+    return productData[field] !== undefined && productData[field] !== "";
+  });
   const hasImages = files && files.length > 0;
 
   if (!hasTextFields && !hasImages) {
@@ -93,27 +93,31 @@ export const updateProductService = async (productId, productData, files, user) 
   }
 
   // Update text fields only if provided
-  if (productData.name !== undefined) product.name = productData.name;
+  if (productData.name !== undefined && productData.name !== "") product.name = productData.name;
   if (productData.description !== undefined) product.description = productData.description;
-  if (productData.price !== undefined) product.price = productData.price;
-  if (productData.category !== undefined) product.category = productData.category;
+  if (productData.price !== undefined && productData.price !== "") product.price = productData.price;
+  if (productData.category !== undefined && productData.category !== "") {
+    product.category = productData.category;
+  }
 
   if (hasImages) {
     const folder = `/${user._id}/${product._id}`;
-
-    // Delete old images before replacing them
-    const deletePromises = product.images.map((image) => {
-      return deleteImageFromImageKit(image.fileId);
-    });
-
-    await Promise.all(deletePromises);
 
     // Upload new images in parallel
     const uploadPromises = files.map((file) => {
       return uploadImageToImageKit(file, folder);
     });
 
-    product.images = await Promise.all(uploadPromises);
+    const newImages = await Promise.all(uploadPromises);
+
+    // Delete old images after new upload succeeds
+    const deletePromises = product.images.map((image) => {
+      return deleteImageFromImageKit(image.fileId);
+    });
+
+    await Promise.all(deletePromises);
+
+    product.images = newImages;
   }
 
   await product.save();

@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 // routes
-app.use("/api/v1/users", userRouter);
+app.use("/api/v1/auth", userRouter);
 app.use("/api/v1/products", productRouter);
 
 app.use(globalErrorHandler);
