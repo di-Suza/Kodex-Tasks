@@ -56,3 +56,8 @@ export const loginUserService = async (loginData) => {
 
   return { user: user.toObject(), token };
 };
+
+export const getMeService = (user) => {
+  // Return logged-in user from auth middleware
+  return user.toObject();
+};

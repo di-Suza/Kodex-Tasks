@@ -1,6 +1,10 @@
 
 
-import { loginUserService, registerUserService } from "../services/auth.service.js";
+import {
+  getMeService,
+  loginUserService,
+  registerUserService,
+} from "../services/auth.service.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
 export const register = catchAsync(async (req, res) => {
@@ -37,6 +41,18 @@ export const login = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     message: "User logged in successfully",
+    data: {
+      user,
+    },
+  });
+});
+
+export const getMe = catchAsync(async (req, res) => {
+  const user = getMeService(req.user);
+
+  res.status(200).json({
+    success: true,
+    message: "User fetched successfully",
     data: {
       user,
     },

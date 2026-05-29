@@ -375,6 +375,7 @@ Current route:
 
 - `POST /register`
 - `POST /login`
+- `GET /me`
 
 Register route pipeline:
 
@@ -399,6 +400,18 @@ Meaning:
 1. First request body is validated.
 2. If validation passes, login controller runs.
 3. If validation fails, global error handler sends response.
+
+GetMe route pipeline:
+
+```js
+userRouter.get("/me", authMiddleware, getMe);
+```
+
+Meaning:
+
+1. First auth middleware checks the token from cookies.
+2. If token is valid, logged-in user is attached to `req.user`.
+3. Then getMe controller sends the logged-in user data.
 
 ### Product Routes
 
@@ -898,5 +911,183 @@ Example:
 {
   "success": false,
   "message": "Invalid email or password"
+}
+```
+
+## 11. GetMe API
+
+### Endpoint
+
+`GET /api/v1/users/me`
+
+### Purpose
+
+Fetch the currently logged-in user profile.
+
+### Authentication Required
+
+Yes.
+
+This API needs the `token` cookie. The token is verified by auth middleware before the controller runs.
+
+### Required Fields
+
+No request body is required.
+
+### Cookie Required
+
+- `token`
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/user.route.js`
+
+The request first reaches:
+
+```js
+GET /api/v1/users/me
+```
+
+The route uses:
+
+- `authMiddleware`
+- `getMe`
+
+#### Step 2: Auth Middleware Runs
+
+File:
+
+`src/middlewares/auth.middleware.js`
+
+Auth middleware checks:
+
+- Token must exist in cookies.
+- Token must not be blacklisted in Redis.
+- Token must be valid using `verifyToken`.
+- User must exist in MongoDB.
+
+If everything is valid:
+
+- User is fetched from database using decoded token id.
+- Full user document is attached to `req.user`.
+- Request moves to controller.
+
+If authentication fails:
+
+- `AppError` is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 3: Controller Runs
+
+File:
+
+`src/controllers/auth.controller.js`
+
+Controller function:
+
+```js
+getMe
+```
+
+Controller responsibility:
+
+- Read logged-in user from `req.user`.
+- Call `getMeService`.
+- Send final success response.
+
+#### Step 4: Service Handles Response Data
+
+File:
+
+`src/services/auth.service.js`
+
+Service function:
+
+```js
+getMeService
+```
+
+Service responsibility:
+
+1. Receive logged-in user from controller.
+2. Convert Mongoose document to plain object.
+3. Return user object to controller.
+
+The password is removed automatically because the user model has `toObject` transform.
+
+#### Step 5: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "User fetched successfully",
+  "data": {
+    "user": {
+      "_id": "USER_ID",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "createdAt": "DATE",
+      "updatedAt": "DATE"
+    }
+  }
+}
+```
+
+### Error Responses
+
+#### Missing Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized user"
+}
+```
+
+#### Blacklisted Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Token has been blacklisted"
+}
+```
+
+#### User Not Found
+
+Status:
+
+`404 Not Found`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "User not found"
 }
 ```
