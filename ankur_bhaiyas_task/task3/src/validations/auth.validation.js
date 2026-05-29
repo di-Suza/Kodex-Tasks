@@ -28,3 +28,21 @@ export const validateRegister = [
 
   handleValidationErrors,
 ];
+
+export const validateLogin = [
+  // Validate login email
+  body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("Email is required")
+    .isEmail()
+    .withMessage("Invalid email format")
+    .normalizeEmail(),
+
+  // Validate login password
+  body("password")
+    .notEmpty()
+    .withMessage("Password is required"),
+
+  handleValidationErrors,
+];

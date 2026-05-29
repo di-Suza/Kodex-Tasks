@@ -251,7 +251,7 @@ Purpose:
 - Read auth token from cookies.
 - Check if token is blacklisted in Redis.
 - Verify token using `verifyToken` utility.
-- Attach logged-in user data to `req.user`.
+- Find logged-in user from database and attach it to `req.user`.
 
 Cookie names supported:
 
@@ -264,8 +264,9 @@ Flow:
 3. Check token in Redis blacklist.
 4. If blacklisted, block request.
 5. Verify token using token utility.
-6. Attach decoded user data to `req.user`.
-7. Continue to next middleware/controller.
+6. Find user in database using decoded token id.
+7. Attach database user data to `req.user`.
+8. Continue to next middleware/controller.
 
 ### Multer Middleware
 
@@ -326,8 +327,9 @@ Purpose:
 Current validation:
 
 - `validateRegister`
+- `validateLogin`
 
-Rules:
+Register rules:
 
 - `name`
   - Required
@@ -342,6 +344,18 @@ Rules:
 - `password`
   - Required
   - Minimum 8 characters
+
+At the end, it uses `handleValidationErrors` middleware.
+
+Login rules:
+
+- `email`
+  - Required
+  - Must be valid email
+  - Normalized
+
+- `password`
+  - Required
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -360,8 +374,9 @@ Base path:
 Current route:
 
 - `POST /register`
+- `POST /login`
 
-Route pipeline:
+Register route pipeline:
 
 ```js
 userRouter.post("/register", validateRegister, register);
@@ -371,6 +386,18 @@ Meaning:
 
 1. First request body is validated.
 2. If validation passes, controller runs.
+3. If validation fails, global error handler sends response.
+
+Login route pipeline:
+
+```js
+userRouter.post("/login", validateLogin, login);
+```
+
+Meaning:
+
+1. First request body is validated.
+2. If validation passes, login controller runs.
 3. If validation fails, global error handler sends response.
 
 ### Product Routes
@@ -393,7 +420,7 @@ Currently product routes are not added yet. They will be documented when created
 
 ### Purpose
 
-Create a new user account and return an auth token.
+Create a new user account and store the auth token in an httpOnly cookie.
 
 ### Authentication Required
 
@@ -495,7 +522,7 @@ Service responsibility:
 4. Hash password using `generateHash`.
 5. Create new user in MongoDB.
 6. Generate JWT token using `generateToken`.
-7. Return user and token to controller.
+7. Return user and token to controller so the controller can set the cookie.
 
 #### Step 5: Password Is Hashed
 
@@ -538,7 +565,7 @@ Payload:
 Purpose:
 
 - Create JWT token for the registered user.
-- Token is sent in response and also stored in cookie.
+- Token is stored only in an httpOnly cookie.
 
 #### Step 7: Response Is Sent
 
@@ -561,8 +588,7 @@ Example response:
       "email": "john@example.com",
       "createdAt": "DATE",
       "updatedAt": "DATE"
-    },
-    "token": "JWT_TOKEN"
+    }
   }
 }
 ```
@@ -628,5 +654,249 @@ Example:
 {
   "success": false,
   "message": "User already exists"
+}
+```
+
+## 10. Login API
+
+### Endpoint
+
+`POST /api/v1/users/login`
+
+### Purpose
+
+Login an existing user and store the auth token in an httpOnly cookie.
+
+### Authentication Required
+
+No.
+
+This API is public because the user needs to login before accessing protected routes.
+
+### Required Fields
+
+```json
+{
+  "email": "john@example.com",
+  "password": "password123"
+}
+```
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/user.route.js`
+
+The request first reaches:
+
+```js
+POST /api/v1/users/login
+```
+
+The route uses:
+
+- `validateLogin`
+- `login`
+
+#### Step 2: Validation Runs
+
+File:
+
+`src/validations/auth.validation.js`
+
+Validation checks:
+
+- `email` must exist and must be a valid email.
+- `password` must exist.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 3: Controller Runs
+
+File:
+
+`src/controllers/auth.controller.js`
+
+Controller function:
+
+```js
+login
+```
+
+Controller responsibility:
+
+- Receive validated request body.
+- Call `loginUserService`.
+- Set token in an httpOnly cookie.
+- Send final success response.
+
+Cookie setup:
+
+- Cookie name: `token`
+- `httpOnly: true`
+- `secure: true` only in production
+- `sameSite: strict`
+- Expiry: 1 hour
+
+#### Step 4: Service Handles Business Logic
+
+File:
+
+`src/services/auth.service.js`
+
+Service function:
+
+```js
+loginUserService
+```
+
+Service responsibility:
+
+1. Receive `email` and `password`.
+2. Find user by email.
+3. Use `.select("+password")` because password is hidden by default in the user model.
+4. If user does not exist, throw `AppError(401, "Invalid email or password")`.
+5. Compare entered password with saved hash using `compareHash`.
+6. If password is wrong, throw `AppError(401, "Invalid email or password")`.
+7. Generate JWT token using `generateToken`.
+8. Return user and token to controller so the controller can set the cookie.
+
+#### Step 5: Password Is Compared
+
+File:
+
+`src/utils/password.js`
+
+Function used:
+
+```js
+compareHash(password, user.password)
+```
+
+Purpose:
+
+- Compare plain login password with bcrypt hashed password stored in database.
+- Avoid exposing whether email or password was wrong.
+
+#### Step 6: Token Is Generated
+
+File:
+
+`src/utils/token.js`
+
+Function used:
+
+```js
+generateToken(payload)
+```
+
+Payload:
+
+```js
+{
+  id: user._id,
+  email: user.email
+}
+```
+
+Purpose:
+
+- Create JWT token for the logged-in user.
+- Token is stored only in an httpOnly cookie.
+
+#### Step 7: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "User logged in successfully",
+  "data": {
+    "user": {
+      "_id": "USER_ID",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "createdAt": "DATE",
+      "updatedAt": "DATE"
+    }
+  }
+}
+```
+
+Password is not returned because the user model removes it using `toJSON` and `toObject` transforms.
+
+### Error Responses
+
+#### Missing Email
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Email is required"
+}
+```
+
+#### Invalid Email
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid email format"
+}
+```
+
+#### Missing Password
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Password is required"
+}
+```
+
+#### Invalid Credentials
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid email or password"
 }
 ```

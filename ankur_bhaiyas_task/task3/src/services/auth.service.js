@@ -1,6 +1,6 @@
 import Users from "../models/user.model.js";
 import { AppError } from "../utils/appError.js";
-import { generateHash } from "../utils/password.js";
+import { compareHash, generateHash } from "../utils/password.js";
 import { generateToken } from "../utils/token.js";
 
 export const registerUserService = async (userData) => {
@@ -23,6 +23,32 @@ export const registerUserService = async (userData) => {
   });
 
   // Generate auth token for newly registered user
+  const token = await generateToken({
+    id: user._id,
+    email: user.email,
+  });
+
+  return { user: user.toObject(), token };
+};
+
+export const loginUserService = async (loginData) => {
+  const { email, password } = loginData;
+
+  // Find user with password for login check
+  const user = await Users.findOne({ email }).select("+password");
+
+  if (!user) {
+    throw new AppError(401, "Invalid email or password");
+  }
+
+  // Compare entered password with saved hash
+  const isPasswordValid = await compareHash(password, user.password);
+
+  if (!isPasswordValid) {
+    throw new AppError(401, "Invalid email or password");
+  }
+
+  // Generate auth token after successful login
   const token = await generateToken({
     id: user._id,
     email: user.email,
