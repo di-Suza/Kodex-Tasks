@@ -13,3 +13,8 @@ export const uploadImageToImageKit = async (file, folder) => {
     fileId: uploadedImage.fileId,
   };
 };
+
+export const deleteImageFromImageKit = async (fileId) => {
+  // Delete image from ImageKit by file id
+  await imagekit.deleteFile(fileId);
+};
