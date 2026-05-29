@@ -1,4 +1,4 @@
-import { body } from "express-validator";
+import { body, query } from "express-validator";
 import { handleValidationErrors } from "../middlewares/validate.middleware.js";
 
 const productCategories = [
@@ -35,6 +35,23 @@ export const validateCreateProduct = [
 
   // Clean optional description
   body("description").optional({ checkFalsy: true }).trim(),
+
+  handleValidationErrors,
+];
+
+export const validateGetAllProducts = [
+  // Validate category filter
+  query("category")
+    .optional({ checkFalsy: true })
+    .isIn(productCategories)
+    .withMessage("Invalid product category"),
+
+  // Validate page number
+  query("page")
+    .optional({ checkFalsy: true })
+    .isInt({ min: 1 })
+    .withMessage("Page must be a positive number")
+    .toInt(),
 
   handleValidationErrors,
 ];

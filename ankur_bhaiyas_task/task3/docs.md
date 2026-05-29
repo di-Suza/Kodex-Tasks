@@ -392,6 +392,7 @@ Purpose:
 Current validation:
 
 - `validateCreateProduct`
+- `validateGetAllProducts`
 
 Create product rules:
 
@@ -412,6 +413,18 @@ Create product rules:
 - `description`
   - Optional
   - Trimmed
+
+At the end, it uses `handleValidationErrors` middleware.
+
+Get all products rules:
+
+- `category`
+  - Optional
+  - Must be one of allowed product categories
+
+- `page`
+  - Optional
+  - Must be a positive number
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -507,7 +520,22 @@ Base path:
 
 Current route:
 
+- `GET /`
 - `POST /`
+
+Get all products route pipeline:
+
+```js
+productRouter.get("/", validateGetAllProducts, getAllProducts);
+```
+
+Meaning:
+
+1. Product query params are validated.
+2. If category is provided, products are filtered by category.
+3. If category is not provided, all products are fetched.
+4. Only 20 products are returned per page.
+5. If validation fails, global error handler sends response.
 
 Create product route pipeline:
 
@@ -1546,7 +1574,225 @@ Example:
 }
 ```
 
-## 13. Logout API
+## 13. Get All Products API
+
+### Endpoint
+
+`GET /api/v1/products`
+
+### Purpose
+
+Fetch products with fixed pagination of 20 products per page. If category is provided in query params, only products from that category are returned.
+
+### Authentication Required
+
+No.
+
+This API is public because product listing can be viewed without login.
+
+### Query Parameters
+
+- `category`
+  - Optional
+  - Filters products by category
+  - Must be one of allowed category values
+
+- `page`
+  - Optional
+  - Default value is `1`
+  - Must be a positive number
+
+Allowed category values:
+
+- `electronics`
+- `clothing`
+- `books`
+- `home`
+- `beauty`
+- `sports`
+
+### Pagination Rule
+
+- Every request returns maximum 20 products.
+- If category is provided, only 20 products from that category are returned.
+- If category is not provided, 20 products from all products are returned.
+- `page` decides which set of 20 products should be fetched.
+
+Examples:
+
+```http
+GET /api/v1/products
+GET /api/v1/products?page=2
+GET /api/v1/products?category=electronics
+GET /api/v1/products?category=electronics&page=2
+```
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/product.route.js`
+
+The request first reaches:
+
+```js
+GET /api/v1/products
+```
+
+The route uses:
+
+- `validateGetAllProducts`
+- `getAllProducts`
+
+#### Step 2: Query Validation Runs
+
+File:
+
+`src/validations/product.validation.js`
+
+Validation checks:
+
+- `category` must match allowed category values if provided.
+- `page` must be a positive number if provided.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 3: Controller Runs
+
+File:
+
+`src/controllers/product.controller.js`
+
+Controller function:
+
+```js
+getAllProducts
+```
+
+Controller responsibility:
+
+- Read query params from `req.query`.
+- Call `getAllProductsService`.
+- Send products and pagination data in response.
+
+#### Step 4: Service Builds Query
+
+File:
+
+`src/services/product.service.js`
+
+Service function:
+
+```js
+getAllProductsService
+```
+
+Service responsibility:
+
+1. Read `category` and `page` from query params.
+2. Use page `1` if page is not provided.
+3. Keep fixed limit as 20 products per page.
+4. Build MongoDB filter object.
+5. If category exists, add category to filter.
+6. If category does not exist, keep filter empty to fetch all products.
+7. Fetch products using `skip` and `limit`.
+8. Count total products for pagination metadata.
+
+Pagination calculation:
+
+```js
+const page = Number(queryData.page) || 1;
+const skip = (page - 1) * 20;
+```
+
+MongoDB query:
+
+```js
+Products.find(filter)
+  .sort({ createdAt: -1 })
+  .skip(skip)
+  .limit(20)
+```
+
+#### Step 5: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Products fetched successfully",
+  "data": {
+    "products": [
+      {
+        "_id": "PRODUCT_ID",
+        "user": "USER_ID",
+        "name": "Wireless Headphones",
+        "description": "Noise cancelling bluetooth headphones",
+        "price": 2999,
+        "category": "electronics",
+        "images": [
+          "https://ik.imagekit.io/example/image1.jpg"
+        ],
+        "createdAt": "DATE",
+        "updatedAt": "DATE"
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "limit": 20,
+      "totalProducts": 35,
+      "totalPages": 2
+    }
+  }
+}
+```
+
+### Error Responses
+
+#### Invalid Category
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product category"
+}
+```
+
+#### Invalid Page
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Page must be a positive number"
+}
+```
+
+## 14. Logout API
 
 ### Endpoint
 
