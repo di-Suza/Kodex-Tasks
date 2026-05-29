@@ -1,5 +1,8 @@
 import app from "./src/app.js";
 import connectToDb from "./src/configs/database.js";
+import redisClient from "./src/configs/cache.js";
+import dotenv from "dotenv";
+dotenv.config();
 
 const PORT = process.env.PORT || 8080;
 
