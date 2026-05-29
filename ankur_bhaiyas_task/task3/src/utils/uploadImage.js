@@ -8,5 +8,8 @@ export const uploadImageToImageKit = async (file, folder) => {
     folder,
   });
 
-  return uploadedImage.url;
+  return {
+    url: uploadedImage.url,
+    fileId: uploadedImage.fileId,
+  };
 };

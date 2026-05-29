@@ -20,9 +20,9 @@ export const createProductService = async (productData, files, user) => {
     return uploadImageToImageKit(file, folder);
   });
 
-  const imageUrls = await Promise.all(uploadPromises);
+  const images = await Promise.all(uploadPromises);
 
-  product.images = imageUrls;
+  product.images = images;
 
   await product.save();
 

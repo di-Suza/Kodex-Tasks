@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 // schema for ecommerce products
 const productSchema = new mongoose.Schema(
   {
-    user:{
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -27,7 +27,18 @@ const productSchema = new mongoose.Schema(
       trim: true,
     },
     images: {
-      type: [String],
+      type: [
+        {
+          url: {
+            type: String,
+            required: true,
+          },
+          fileId: {
+            type: String,
+            required: true,
+          },
+        },
+      ],
       default: [],
     },
   },

@@ -140,13 +140,15 @@ Fields:
     - `sports`
 
 - `images`
-  - Array of strings
+  - Array of objects
+  - Each object stores `url` and `fileId`
   - Default empty array
 
 Purpose:
 
 - Store ecommerce product data.
-- Support multiple image URLs.
+- Support multiple image uploads.
+- Support ImageKit file deletion later using `fileId`.
 - Support category filtering later.
 
 ## 5. Utilities
@@ -240,7 +242,7 @@ Purpose:
 
 - Upload a single image file to ImageKit.
 - Convert multer memory buffer into base64 before upload.
-- Return uploaded image URL for saving in product document.
+- Return uploaded image URL and ImageKit file id for saving in product document.
 
 Function:
 
@@ -1420,7 +1422,7 @@ Service responsibility:
 2. Attach logged-in user id to `user` field.
 3. Use generated product id before save to build ImageKit folder path.
 4. Upload all images to ImageKit in parallel using `Promise.all`.
-5. Save uploaded image URLs in `images` array.
+5. Save uploaded image URL and file id in `images` array.
 6. Save product in MongoDB.
 7. Return created product to controller.
 
@@ -1470,7 +1472,7 @@ Purpose:
 
 - Convert file buffer to base64.
 - Upload image to ImageKit.
-- Return uploaded image URL.
+- Return uploaded image URL and file id.
 
 #### Step 9: Response Is Sent
 
@@ -1495,8 +1497,14 @@ Example response:
       "price": 2999,
       "category": "electronics",
       "images": [
-        "https://ik.imagekit.io/example/image1.jpg",
-        "https://ik.imagekit.io/example/image2.jpg"
+        {
+          "url": "https://ik.imagekit.io/example/image1.jpg",
+          "fileId": "IMAGEKIT_FILE_ID_1"
+        },
+        {
+          "url": "https://ik.imagekit.io/example/image2.jpg",
+          "fileId": "IMAGEKIT_FILE_ID_2"
+        }
       ],
       "createdAt": "DATE",
       "updatedAt": "DATE"
@@ -1767,7 +1775,10 @@ Example response:
         "price": 2999,
         "category": "electronics",
         "images": [
-          "https://ik.imagekit.io/example/image1.jpg"
+          {
+            "url": "https://ik.imagekit.io/example/image1.jpg",
+            "fileId": "IMAGEKIT_FILE_ID_1"
+          }
         ],
         "createdAt": "DATE",
         "updatedAt": "DATE"
@@ -1938,7 +1949,10 @@ Example response:
       "price": 2999,
       "category": "electronics",
       "images": [
-        "https://ik.imagekit.io/example/image1.jpg"
+        {
+          "url": "https://ik.imagekit.io/example/image1.jpg",
+          "fileId": "IMAGEKIT_FILE_ID_1"
+        }
       ],
       "createdAt": "DATE",
       "updatedAt": "DATE"
