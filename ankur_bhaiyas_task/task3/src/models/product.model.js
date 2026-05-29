@@ -3,6 +3,11 @@ import mongoose from "mongoose";
 // schema for ecommerce products
 const productSchema = new mongoose.Schema(
   {
+    user:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     name: {
       type: String,
       required: true,

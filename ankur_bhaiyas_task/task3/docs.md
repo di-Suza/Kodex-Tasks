@@ -33,6 +33,9 @@ I started by creating a basic Express server setup for the ecommerce API.
 - `cookie-parser`
   - Used to read cookies from incoming requests.
 
+- `imagekit`
+  - Used to upload product images to ImageKit storage.
+
 ## 2. Database Configuration
 
 MongoDB connection is handled inside:
@@ -227,6 +230,27 @@ Environment variables used:
 - `PRIVATE_JWT_KEY_BS64`
 - `PUBLIC_JWT_KEY_BS64`
 
+### Upload Image Utility
+
+File:
+
+`src/utils/uploadImage.js`
+
+Purpose:
+
+- Upload a single image file to ImageKit.
+- Convert multer memory buffer into base64 before upload.
+- Return uploaded image URL for saving in product document.
+
+Function:
+
+- `uploadImageToImageKit`
+
+Why this utility was created:
+
+- Product service can focus on business logic.
+- ImageKit upload logic stays reusable for future image upload features.
+
 ## 6. Middleware
 
 ### Global Error Handler
@@ -287,6 +311,13 @@ Library used:
 - `multer`
 
 This will be used later for product image upload APIs.
+For product creation, it is used with:
+
+```js
+upload.array("images")
+```
+
+This allows the API to receive multiple files in `req.files`.
 
 ### Validation Middleware
 
@@ -345,6 +376,42 @@ Register rules:
 - `password`
   - Required
   - Minimum 8 characters
+
+At the end, it uses `handleValidationErrors` middleware.
+
+### Product Validation
+
+File:
+
+`src/validations/product.validation.js`
+
+Purpose:
+
+- Store validation rules for product-related APIs.
+
+Current validation:
+
+- `validateCreateProduct`
+
+Create product rules:
+
+- `name`
+  - Required
+  - Trimmed
+  - Minimum 2 characters
+
+- `price`
+  - Required
+  - Must be greater than 0
+  - Converted to number
+
+- `category`
+  - Optional
+  - Must be one of allowed product categories
+
+- `description`
+  - Optional
+  - Trimmed
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -438,7 +505,29 @@ Base path:
 
 `/api/v1/products`
 
-Currently product routes are not added yet. They will be documented when created.
+Current route:
+
+- `POST /`
+
+Create product route pipeline:
+
+```js
+productRouter.post(
+  "/",
+  authMiddleware,
+  upload.array("images"),
+  validateCreateProduct,
+  createProduct,
+);
+```
+
+Meaning:
+
+1. First auth middleware verifies the logged-in user.
+2. Multer accepts multiple product images from `images` field.
+3. Product request body is validated.
+4. If validation passes, create product controller runs.
+5. If validation fails, global error handler sends response.
 
 ## 9. Register API
 
@@ -1107,7 +1196,357 @@ Example:
 }
 ```
 
-## 12. Logout API
+## 12. Create Product API
+
+### Endpoint
+
+`POST /api/v1/products`
+
+### Purpose
+
+Create a new ecommerce product for the logged-in user and upload multiple product images to ImageKit.
+
+### Authentication Required
+
+Yes.
+
+This API needs the `token` cookie. The auth middleware verifies the token and attaches the logged-in user to `req.user`.
+
+### Content Type
+
+`multipart/form-data`
+
+### Required Fields
+
+- `name`
+- `price`
+
+### Optional Fields
+
+- `description`
+- `category`
+- `images`
+
+Allowed category values:
+
+- `electronics`
+- `clothing`
+- `books`
+- `home`
+- `beauty`
+- `sports`
+
+### Example Request Body
+
+Form-data fields:
+
+```json
+{
+  "name": "Wireless Headphones",
+  "description": "Noise cancelling bluetooth headphones",
+  "price": 2999,
+  "category": "electronics",
+  "images": ["image1.jpg", "image2.jpg"]
+}
+```
+
+The `images` field accepts multiple files.
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/product.route.js`
+
+The request first reaches:
+
+```js
+POST /api/v1/products
+```
+
+The route uses:
+
+- `authMiddleware`
+- `upload.array("images")`
+- `validateCreateProduct`
+- `createProduct`
+
+#### Step 2: Auth Middleware Runs
+
+File:
+
+`src/middlewares/auth.middleware.js`
+
+Auth middleware checks:
+
+- Token must exist in cookies.
+- Token must not be blacklisted in Redis.
+- Token must be valid using `verifyToken`.
+- User must exist in MongoDB.
+
+If everything is valid:
+
+- User is fetched from database using decoded token id.
+- Full user document is attached to `req.user`.
+- Request moves to multer middleware.
+
+#### Step 3: Multer Middleware Runs
+
+File:
+
+`src/middlewares/multer.middleware.js`
+
+Multer setup:
+
+```js
+upload.array("images")
+```
+
+Purpose:
+
+- Accept multiple image files.
+- Store files in memory using `memoryStorage`.
+- Put uploaded files inside `req.files`.
+- Reject non-image files using `AppError`.
+- Limit each file size to 5MB.
+
+#### Step 4: Validation Runs
+
+File:
+
+`src/validations/product.validation.js`
+
+Validation checks:
+
+- `name` must exist and must be at least 2 characters.
+- `price` must exist and must be greater than 0.
+- `category` must match allowed category values if provided.
+- `description` is optional and trimmed.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 5: Controller Runs
+
+File:
+
+`src/controllers/product.controller.js`
+
+Controller function:
+
+```js
+createProduct
+```
+
+Controller responsibility:
+
+- Receive validated body from `req.body`.
+- Receive uploaded files from `req.files`.
+- Receive logged-in user from `req.user`.
+- Call `createProductService`.
+- Send final success response.
+
+#### Step 6: Service Creates Product And Uploads Images
+
+File:
+
+`src/services/product.service.js`
+
+Service function:
+
+```js
+createProductService
+```
+
+Service responsibility:
+
+1. Create a new product document in memory.
+2. Attach logged-in user id to `user` field.
+3. Use generated product id before save to build ImageKit folder path.
+4. Upload all images to ImageKit in parallel using `Promise.all`.
+5. Save uploaded image URLs in `images` array.
+6. Save product in MongoDB.
+7. Return created product to controller.
+
+ImageKit folder path:
+
+```js
+/${user._id}/${product._id}
+```
+
+This keeps images organized user-wise and product-wise.
+
+#### Step 7: Images Are Uploaded In Parallel
+
+File:
+
+`src/services/product.service.js`
+
+Upload logic:
+
+```js
+const uploadPromises = (files || []).map((file) => {
+  return uploadImageToImageKit(file, folder);
+});
+
+const imageUrls = await Promise.all(uploadPromises);
+```
+
+Why `Promise.all` is used:
+
+- Multiple images upload together.
+- It is faster than uploading one image at a time.
+- The service waits until all uploads finish before saving product.
+
+#### Step 8: ImageKit Upload Utility Runs
+
+File:
+
+`src/utils/uploadImage.js`
+
+Function used:
+
+```js
+uploadImageToImageKit(file, folder)
+```
+
+Purpose:
+
+- Convert file buffer to base64.
+- Upload image to ImageKit.
+- Return uploaded image URL.
+
+#### Step 9: Response Is Sent
+
+Success response:
+
+Status code:
+
+`201 Created`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Product created successfully",
+  "data": {
+    "product": {
+      "_id": "PRODUCT_ID",
+      "user": "USER_ID",
+      "name": "Wireless Headphones",
+      "description": "Noise cancelling bluetooth headphones",
+      "price": 2999,
+      "category": "electronics",
+      "images": [
+        "https://ik.imagekit.io/example/image1.jpg",
+        "https://ik.imagekit.io/example/image2.jpg"
+      ],
+      "createdAt": "DATE",
+      "updatedAt": "DATE"
+    }
+  }
+}
+```
+
+### Error Responses
+
+#### Missing Token
+
+Status:
+
+`401 Unauthorized`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Unauthorized user"
+}
+```
+
+#### Missing Product Name
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product name is required"
+}
+```
+
+#### Missing Product Price
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product price is required"
+}
+```
+
+#### Invalid Product Price
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product price must be greater than 0"
+}
+```
+
+#### Invalid Category
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product category"
+}
+```
+
+#### Invalid File Type
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Please attach only image files!"
+}
+```
+
+## 13. Logout API
 
 ### Endpoint
 
