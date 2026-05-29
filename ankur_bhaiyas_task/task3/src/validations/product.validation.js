@@ -1,4 +1,4 @@
-import { body, query } from "express-validator";
+import { body, param, query } from "express-validator";
 import { handleValidationErrors } from "../middlewares/validate.middleware.js";
 
 const productCategories = [
@@ -52,6 +52,15 @@ export const validateGetAllProducts = [
     .isInt({ min: 1 })
     .withMessage("Page must be a positive number")
     .toInt(),
+
+  handleValidationErrors,
+];
+
+export const validateProductId = [
+  // Validate product id param
+  param("id")
+    .isMongoId()
+    .withMessage("Invalid product id"),
 
   handleValidationErrors,
 ];

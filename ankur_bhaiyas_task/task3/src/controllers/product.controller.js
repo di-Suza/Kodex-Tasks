@@ -1,6 +1,7 @@
 import {
   createProductService,
   getAllProductsService,
+  getProductByIdService,
 } from "../services/product.service.js";
 import { catchAsync } from "../utils/catchAsync.js";
 
@@ -13,6 +14,18 @@ export const getAllProducts = catchAsync(async (req, res) => {
     data: {
       products,
       pagination,
+    },
+  });
+});
+
+export const getProductById = catchAsync(async (req, res) => {
+  const product = await getProductByIdService(req.params.id);
+
+  res.status(200).json({
+    success: true,
+    message: "Product fetched successfully",
+    data: {
+      product,
     },
   });
 });

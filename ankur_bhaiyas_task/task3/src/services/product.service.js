@@ -1,4 +1,5 @@
 import Products from "../models/product.model.js";
+import { AppError } from "../utils/appError.js";
 import { uploadImageToImageKit } from "../utils/uploadImage.js";
 
 const PRODUCTS_PER_PAGE = 20;
@@ -56,4 +57,14 @@ export const getAllProductsService = async (queryData) => {
       totalPages: Math.ceil(totalProducts / PRODUCTS_PER_PAGE),
     },
   };
+};
+
+export const getProductByIdService = async (productId) => {
+  const product = await Products.findById(productId);
+
+  if (!product) {
+    throw new AppError(404, "Product not found");
+  }
+
+  return product;
 };

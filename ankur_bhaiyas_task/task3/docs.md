@@ -393,6 +393,7 @@ Current validation:
 
 - `validateCreateProduct`
 - `validateGetAllProducts`
+- `validateProductId`
 
 Create product rules:
 
@@ -413,6 +414,14 @@ Create product rules:
 - `description`
   - Optional
   - Trimmed
+
+At the end, it uses `handleValidationErrors` middleware.
+
+Product id rules:
+
+- `id`
+  - Required in route params
+  - Must be a valid MongoDB ObjectId
 
 At the end, it uses `handleValidationErrors` middleware.
 
@@ -521,6 +530,7 @@ Base path:
 Current route:
 
 - `GET /`
+- `GET /:id`
 - `POST /`
 
 Get all products route pipeline:
@@ -536,6 +546,19 @@ Meaning:
 3. If category is not provided, all products are fetched.
 4. Only 20 products are returned per page.
 5. If validation fails, global error handler sends response.
+
+Get product by id route pipeline:
+
+```js
+productRouter.get("/:id", validateProductId, getProductById);
+```
+
+Meaning:
+
+1. Product id route param is validated.
+2. If id is valid, controller fetches product by id.
+3. If product does not exist, global error handler sends not found response.
+4. If validation fails, global error handler sends response.
 
 Create product route pipeline:
 
@@ -1792,7 +1815,171 @@ Example:
 }
 ```
 
-## 14. Logout API
+## 14. Get Product By ID API
+
+### Endpoint
+
+`GET /api/v1/products/:id`
+
+### Purpose
+
+Fetch a single product by its MongoDB product id.
+
+### Authentication Required
+
+No.
+
+This API is public because a product detail page can be viewed without login.
+
+### Route Parameters
+
+- `id`
+  - Required
+  - Must be a valid MongoDB ObjectId
+
+### Example Request
+
+```http
+GET /api/v1/products/665f1d2c3b4a9d0012ab3456
+```
+
+### End-to-End Flow
+
+#### Step 1: Request Comes To Route
+
+File:
+
+`src/routes/product.route.js`
+
+The request first reaches:
+
+```js
+GET /api/v1/products/:id
+```
+
+The route uses:
+
+- `validateProductId`
+- `getProductById`
+
+#### Step 2: Param Validation Runs
+
+File:
+
+`src/validations/product.validation.js`
+
+Validation checks:
+
+- `id` must be a valid MongoDB ObjectId.
+
+If validation fails:
+
+- `handleValidationErrors` creates an `AppError`.
+- Error is passed to global error handler.
+- Request does not reach the controller.
+
+#### Step 3: Controller Runs
+
+File:
+
+`src/controllers/product.controller.js`
+
+Controller function:
+
+```js
+getProductById
+```
+
+Controller responsibility:
+
+- Read product id from `req.params.id`.
+- Call `getProductByIdService`.
+- Send product data in response.
+
+#### Step 4: Service Fetches Product
+
+File:
+
+`src/services/product.service.js`
+
+Service function:
+
+```js
+getProductByIdService
+```
+
+Service responsibility:
+
+1. Receive product id from controller.
+2. Find product using `Products.findById(productId)`.
+3. If product does not exist, throw `AppError(404, "Product not found")`.
+4. Return product to controller.
+
+#### Step 5: Response Is Sent
+
+Success response:
+
+Status code:
+
+`200 OK`
+
+Example response:
+
+```json
+{
+  "success": true,
+  "message": "Product fetched successfully",
+  "data": {
+    "product": {
+      "_id": "PRODUCT_ID",
+      "user": "USER_ID",
+      "name": "Wireless Headphones",
+      "description": "Noise cancelling bluetooth headphones",
+      "price": 2999,
+      "category": "electronics",
+      "images": [
+        "https://ik.imagekit.io/example/image1.jpg"
+      ],
+      "createdAt": "DATE",
+      "updatedAt": "DATE"
+    }
+  }
+}
+```
+
+### Error Responses
+
+#### Invalid Product ID
+
+Status:
+
+`400 Bad Request`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Invalid product id"
+}
+```
+
+#### Product Not Found
+
+Status:
+
+`404 Not Found`
+
+Example:
+
+```json
+{
+  "success": false,
+  "message": "Product not found"
+}
+```
+
+## 15. Logout API
 
 ### Endpoint
 
