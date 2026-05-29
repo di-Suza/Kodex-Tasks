@@ -24,7 +24,7 @@ const createNoteService = async ({ title, description }, user) => {
   const note = await Notes.create({
     title,
     description,
-    user: user.email,
+    user: user._id,
   });
 
   return note;
