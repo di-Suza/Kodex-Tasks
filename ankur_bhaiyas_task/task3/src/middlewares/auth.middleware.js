@@ -44,7 +44,15 @@ export const authMiddleware = catchAsync(async (req, res, next) => {
     throw new AppError(401, "Token has been blacklisted");
   }
 
-  const decodedToken = await verifyToken(token);
+  let decodedToken;
+
+  try {
+    // Verify token and handle JWT errors safely
+    decodedToken = await verifyToken(token);
+  } catch (error) {
+    throw new AppError(401, "Invalid or expired token");
+  }
+
   const decoded = decodedToken.data;
 
   const user = await Users.findById(decoded.id);

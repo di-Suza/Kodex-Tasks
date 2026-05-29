@@ -1,4 +1,6 @@
 import Redis from "ioredis";
+import dotenv from "dotenv";
+dotenv.config();
 
 // redis configuration logic
 const redis = new Redis({
